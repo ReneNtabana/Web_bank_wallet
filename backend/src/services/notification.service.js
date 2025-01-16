@@ -1,5 +1,5 @@
-const { Budget, Transaction } = require('../models');
-const { Op } = require('sequelize');
+import { Budget, Transaction } from '../models/index.js';
+import { Op } from 'sequelize';
 
 class NotificationService {
   static async checkBudgetThresholds(userId, transaction) {
@@ -63,4 +63,4 @@ class NotificationService {
   }
 }
 
-module.exports = NotificationService; 
+export default NotificationService; 

@@ -1,6 +1,6 @@
-const { Budget, Category, Transaction } = require('../models');
-const { validationResult } = require('express-validator');
-const { Op } = require('sequelize');
+import { Budget, Category, Transaction } from '../models/index.js';
+import { validationResult } from 'express-validator';
+import { Op } from 'sequelize';
 
 // @desc    Create new budget
 // @route   POST /api/budgets
@@ -223,7 +223,7 @@ const getBudgetStatus = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createBudget,
   getBudgets,
   getBudget,

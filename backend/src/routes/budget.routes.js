@@ -1,15 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
-const {
+import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
+import {
   createBudget,
   getBudgets,
   getBudget,
   updateBudget,
   deleteBudget,
   getBudgetStatus
-} = require('../controllers/budget.controller');
-const { budgetValidator } = require('../middleware/validators/budget.validator');
+} from '../controllers/budget.controller.js';
+import { budgetValidator } from '../middleware/validators/budget.validator.js';
+
+const router = express.Router();
 
 router.route('/')
   .post(protect, budgetValidator, createBudget)
@@ -22,4 +23,4 @@ router.route('/:id')
   .put(protect, budgetValidator, updateBudget)
   .delete(protect, deleteBudget);
 
-module.exports = router; 
+export default router; 

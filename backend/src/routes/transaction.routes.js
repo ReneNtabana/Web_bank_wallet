@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
-const {
+import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
+import {
   createTransaction,
   getTransactions,
   getTransaction,
   updateTransaction,
   deleteTransaction
-} = require('../controllers/transaction.controller');
-const { transactionValidator } = require('../middleware/validators/transaction.validator');
+} from '../controllers/transaction.controller.js';
+import { transactionValidator } from '../middleware/validators/transaction.validator.js';
+
+const router = express.Router();
 
 router.route('/')
   .post(protect, transactionValidator, createTransaction)
@@ -19,4 +20,4 @@ router.route('/:id')
   .put(protect, transactionValidator, updateTransaction)
   .delete(protect, deleteTransaction);
 
-module.exports = router; 
+export default router; 

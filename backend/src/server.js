@@ -1,12 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const { connectDB } = require('./config/database');
-const { errorHandler, notFound } = require('./middleware/error.middleware');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth.routes.js';
+import accountRoutes from './routes/account.routes.js';
+import transactionRoutes from './routes/transaction.routes.js';
+import categoryRoutes from './routes/category.routes.js';
+import budgetRoutes from './routes/budget.routes.js';
+import { connectDB } from './config/database.js';
+import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 // Initialize express app
 const app = express();
+dotenv.config();
 
 // Connect to Database
 connectDB();
@@ -17,12 +23,11 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Routes
-app.use('/api/auth', require('./routes/auth.routes'));
-app.use('/api/users', require('./routes/user.routes'));
-app.use('/api/accounts', require('./routes/account.routes'));
-app.use('/api/transactions', require('./routes/transaction.routes'));
-app.use('/api/categories', require('./routes/category.routes'));
-app.use('/api/budgets', require('./routes/budget.routes'));
+app.use('/api/auth', authRoutes);
+app.use('/api/accounts', accountRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 // Error Handling
 app.use(notFound);

@@ -1,4 +1,4 @@
-const { check } = require('express-validator');
+import { check } from 'express-validator';
 
 const budgetValidator = [
   check('categoryId', 'Category ID is required').isInt(),
@@ -33,6 +33,4 @@ const budgetValidator = [
     })
 ];
 
-module.exports = {
-  budgetValidator
-}; 
+export { budgetValidator }; 

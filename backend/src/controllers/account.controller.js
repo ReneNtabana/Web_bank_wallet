@@ -1,5 +1,5 @@
-const { Account } = require('../models');
-const { validationResult } = require('express-validator');
+import { Account } from '../models/index.js';
+import { validationResult } from 'express-validator';
 
 // @desc    Create new account
 // @route   POST /api/accounts
@@ -119,7 +119,7 @@ const deleteAccount = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createAccount,
   getAccounts,
   getAccount,
