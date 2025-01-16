@@ -1,4 +1,4 @@
-const { check } = require('express-validator');
+import { check } from 'express-validator';
 
 const categoryValidator = [
   check('name', 'Name is required').not().isEmpty(),
@@ -9,6 +9,4 @@ const categoryValidator = [
   check('isActive').optional().isBoolean()
 ];
 
-module.exports = {
-  categoryValidator
-}; 
+export { categoryValidator }; 

@@ -1,4 +1,4 @@
-const { check } = require('express-validator');
+import { check } from 'express-validator';
 
 const accountValidator = [
   check('name', 'Name is required').not().isEmpty(),
@@ -9,6 +9,4 @@ const accountValidator = [
   check('isActive').optional().isBoolean()
 ];
 
-module.exports = {
-  accountValidator
-}; 
+export { accountValidator }; 

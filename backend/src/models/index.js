@@ -1,8 +1,8 @@
-const User = require('./User.model');
-const Account = require('./Account.model');
-const Category = require('./Category.model');
-const Transaction = require('./Transaction.model');
-const Budget = require('./Budget.model');
+import { User } from './User.model.js';
+import  { Account}  from './Account.model.js';
+import { Category } from './Category.model.js';
+import { Transaction } from './Transaction.model.js';
+import { Budget } from './Budget.model.js';
 
 // User Associations
 User.hasMany(Account, { foreignKey: 'userId' });
@@ -30,7 +30,7 @@ Transaction.belongsTo(Category, { foreignKey: 'categoryId' });
 Budget.belongsTo(User, { foreignKey: 'userId' });
 Budget.belongsTo(Category, { foreignKey: 'categoryId' });
 
-module.exports = {
+export {
   User,
   Account,
   Category,

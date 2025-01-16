@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
-const {
+import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
+import {
   createCategory,
   getCategories,
   getCategory,
   updateCategory,
   deleteCategory
-} = require('../controllers/category.controller');
-const { categoryValidator } = require('../middleware/validators/category.validator');
+} from '../controllers/category.controller.js';
+import { categoryValidator } from '../middleware/validators/category.validator.js';
+
+const router = express.Router();
 
 router.route('/')
   .post(protect, categoryValidator, createCategory)
@@ -19,4 +20,4 @@ router.route('/:id')
   .put(protect, categoryValidator, updateCategory)
   .delete(protect, deleteCategory);
 
-module.exports = router; 
+export default router; 

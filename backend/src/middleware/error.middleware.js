@@ -13,7 +13,7 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-module.exports = {
+export {
   errorHandler,
   notFound,
 }; 
