@@ -37,4 +37,4 @@ const Account = sequelize.define('Account', {
   timestamps: true
 });
 
-export default Account; 
+export { Account }; 

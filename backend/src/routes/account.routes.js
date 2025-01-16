@@ -7,7 +7,7 @@ import {
   updateAccount,
   deleteAccount
 } from '../controllers/account.controller.js';
-import { accountValidator } from '../middleware/validators/account.validator';
+import { accountValidator } from '../middleware/validators/account.validator.js';
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 import { User } from './User.model.js';
-import { Account } from './Account.model.js';
+import  { Account}  from './Account.model.js';
 import { Category } from './Category.model.js';
 import { Transaction } from './Transaction.model.js';
 import { Budget } from './Budget.model.js';

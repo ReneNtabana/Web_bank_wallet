@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.model.js';
+
+import { User } from '../models/User.model.js';
 import { validationResult } from 'express-validator';
 
 // Generate JWT Token
