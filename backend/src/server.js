@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const connectDB = require('./config/database');
+const { connectDB } = require('./config/database');
+const { errorHandler, notFound } = require('./middleware/error.middleware');
 require('dotenv').config();
 
 // Initialize express app
@@ -23,11 +24,9 @@ app.use('/api/transactions', require('./routes/transaction.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/budgets', require('./routes/budget.routes'));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
+// Error Handling
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

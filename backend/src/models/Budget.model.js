@@ -1,54 +1,59 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const budgetSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const Budget = sequelize.define('Budget', {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Categories',
+      key: 'id'
+    }
   },
   amount: {
-    type: Number,
-    required: true
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
   },
   period: {
-    type: String,
-    enum: ['daily', 'weekly', 'monthly', 'yearly'],
-    default: 'monthly'
+    type: DataTypes.ENUM('daily', 'weekly', 'monthly', 'yearly'),
+    defaultValue: 'monthly'
   },
   startDate: {
-    type: Date,
-    required: true
+    type: DataTypes.DATE,
+    allowNull: false
   },
   endDate: {
-    type: Date,
-    required: true
+    type: DataTypes.DATE,
+    allowNull: false
   },
   notifications: {
-    enabled: {
-      type: Boolean,
-      default: true
-    },
-    threshold: {
-      type: Number,
-      default: 80 // percentage
+    type: DataTypes.JSONB,
+    defaultValue: {
+      enabled: true,
+      threshold: 80
     }
   },
   currentSpending: {
-    type: Number,
-    default: 0
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0
   },
   isActive: {
-    type: Boolean,
-    default: true
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
-}, { timestamps: true });
+}, {
+  timestamps: true,
+  indexes: [
+    { fields: ['startDate', 'endDate'] }
+  ]
+});
 
-// Index for efficient date-based queries
-budgetSchema.index({ startDate: 1, endDate: 1 });
-
-module.exports = mongoose.model('Budget', budgetSchema); 
+module.exports = Budget; 

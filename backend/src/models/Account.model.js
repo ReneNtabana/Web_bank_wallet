@@ -1,35 +1,40 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const accountSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const Account = sequelize.define('Account', {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   type: {
-    type: String,
-    required: true,
-    enum: ['bank', 'cash', 'mobile_money', 'other']
+    type: DataTypes.ENUM('bank', 'cash', 'mobile_money', 'other'),
+    allowNull: false
   },
   balance: {
-    type: Number,
-    default: 0
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0
   },
   currency: {
-    type: String,
-    default: 'USD'
+    type: DataTypes.STRING,
+    defaultValue: 'USD'
   },
   description: {
-    type: String
+    type: DataTypes.TEXT
   },
   isActive: {
-    type: Boolean,
-    default: true
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
-}, { timestamps: true });
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model('Account', accountSchema); 
+module.exports = Account; 

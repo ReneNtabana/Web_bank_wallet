@@ -1,0 +1,23 @@
+{
+    "development": {
+        "username": "bankuser",
+        "password": "bankpass",
+        "database": "bank_wallet",
+        "host": "localhost",
+        "dialect": "postgres"
+    },
+    "test": {
+        "username": "bankuser",
+        "password": "bankpass",
+        "database": "bank_wallet_test",
+        "host": "localhost",
+        "dialect": "postgres"
+    },
+    "production": {
+        "username": "bankuser",
+        "password": "bankpass",
+        "database": "bank_wallet_prod",
+        "host": "localhost",
+        "dialect": "postgres"
+    }
+}

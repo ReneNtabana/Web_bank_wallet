@@ -1,58 +1,63 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const transactionSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const Transaction = sequelize.define('Transaction', {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
   },
-  account: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Account',
-    required: true
+  accountId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Accounts',
+      key: 'id'
+    }
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Categories',
+      key: 'id'
+    }
   },
   type: {
-    type: String,
-    enum: ['income', 'expense', 'transfer'],
-    required: true
+    type: DataTypes.ENUM('income', 'expense', 'transfer'),
+    allowNull: false
   },
   amount: {
-    type: Number,
-    required: true
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
   },
   description: {
-    type: String
+    type: DataTypes.TEXT
   },
   date: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
   },
   status: {
-    type: String,
-    enum: ['completed', 'pending', 'cancelled'],
-    default: 'completed'
+    type: DataTypes.ENUM('completed', 'pending', 'cancelled'),
+    defaultValue: 'completed'
   },
-  attachments: [{
-    name: String,
-    url: String
-  }],
+  attachments: {
+    type: DataTypes.JSONB,
+    defaultValue: []
+  },
   location: {
-    type: {
-      type: String,
-      enum: ['Point'],
-    },
-    coordinates: {
-      type: [Number],
-    }
+    type: DataTypes.GEOMETRY('POINT'),
+    allowNull: true
   }
-}, { timestamps: true });
+}, {
+  timestamps: true,
+  indexes: [
+    { fields: ['date'] }
+  ]
+});
 
-// Index for date-based queries
-transactionSchema.index({ date: -1 });
-
-module.exports = mongoose.model('Transaction', transactionSchema); 
+module.exports = Transaction; 
