@@ -73,7 +73,6 @@ Web-bank-wallet/
 │ │ ├── middleware/
 │ │ └── config/
 │ ├── package.json
-│ └── .env
 └── frontend/
 ├── src/
 │ ├── components/

@@ -6,9 +6,10 @@ import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 
 // Lazy load pages
-const Login = React.lazy(() => import('./pages/Login'));
-const Register = React.lazy(() => import('./pages/Register'));
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+//to be continued
+// const Login = React.lazy(() => import('./pages/Login'));
+// const Register = React.lazy(() => import('./pages/Register'));
+// const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 
 function App() {
   return (
@@ -25,16 +26,16 @@ function App() {
           >
             <main className="max-w-7xl mx-auto px-4 py-6">
               <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
+                {/* <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} /> */}
+                {/* <Route
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
                   }
-                />
+                /> */}
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </main>

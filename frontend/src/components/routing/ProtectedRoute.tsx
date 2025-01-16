@@ -1,9 +1,10 @@
+import React, { ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 
 interface ProtectedRouteProps {
-  children: JSX.Element;
+  children: ReactElement;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
