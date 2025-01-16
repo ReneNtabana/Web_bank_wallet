@@ -1,7 +1,7 @@
-const { Transaction, Account, Category } = require('../models');
-const { validationResult } = require('express-validator');
-const { sequelize } = require('../config/database');
-const NotificationService = require('../services/notification.service');
+import { Transaction, Account, Category } from '../models/index.js';
+import { validationResult } from 'express-validator';
+import { sequelize } from '../config/database.js';
+import NotificationService from '../services/notification.service.js';
 
 // @desc    Create new transaction
 // @route   POST /api/transactions
@@ -216,7 +216,7 @@ const deleteTransaction = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createTransaction,
   getTransactions,
   getTransaction,

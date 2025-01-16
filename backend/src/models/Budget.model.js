@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 const Budget = sequelize.define('Budget', {
   userId: {
@@ -56,4 +56,4 @@ const Budget = sequelize.define('Budget', {
   ]
 });
 
-module.exports = Budget; 
+export { Budget }; 

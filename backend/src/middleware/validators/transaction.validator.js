@@ -1,4 +1,4 @@
-const { check } = require('express-validator');
+import { check } from 'express-validator';
 
 const transactionValidator = [
   check('accountId', 'Account ID is required').isInt(),
@@ -12,6 +12,4 @@ const transactionValidator = [
   check('status').optional().isIn(['completed', 'pending', 'cancelled'])
 ];
 
-module.exports = {
-  transactionValidator
-}; 
+export { transactionValidator }; 

@@ -1,5 +1,5 @@
-const { Category } = require('../models');
-const { validationResult } = require('express-validator');
+import { Category } from '../models/index.js';
+import { validationResult } from 'express-validator';
 
 // @desc    Create new category
 // @route   POST /api/categories
@@ -133,7 +133,7 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createCategory,
   getCategories,
   getCategory,

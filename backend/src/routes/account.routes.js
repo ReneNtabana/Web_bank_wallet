@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
-const {
+import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
+import {
   createAccount,
   getAccounts,
   getAccount,
   updateAccount,
   deleteAccount
-} = require('../controllers/account.controller');
-const { accountValidator } = require('../middleware/validators/account.validator');
+} from '../controllers/account.controller.js';
+import { accountValidator } from '../middleware/validators/account.validator';
+
+const router = express.Router();
 
 router.route('/')
   .post(protect, accountValidator, createAccount)
@@ -19,4 +20,4 @@ router.route('/:id')
   .put(protect, accountValidator, updateAccount)
   .delete(protect, deleteAccount);
 
-module.exports = router; 
+export default router; 
