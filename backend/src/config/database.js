@@ -1,13 +1,15 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 
+dotenv.config();
+
 const sequelize = new Sequelize({
   dialect: 'postgres',
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  database: process.env.DB_NAME || 'bank_wallet',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
     max: 5,
@@ -25,7 +27,7 @@ const connectDB = async () => {
     // Sync all models
     if (process.env.NODE_ENV === 'development') {
       // Import models with associations
-      require('../models');
+      import ('../models/index.js')
       await sequelize.sync({ alter: true });
       console.log('Database models synchronized');
     }

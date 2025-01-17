@@ -34,6 +34,8 @@ const register = async (req, res) => {
       password,
     });
 
+    console.log('User created:', user);
+
     res.status(201).json({
       id: user.id,
       name: user.name,
@@ -58,7 +60,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({where: { email }  });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -85,7 +87,7 @@ const login = async (req, res) => {
 // @access  Private
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const user = await User.findByPk(req.user.id, { attributes: { exclude: ['password'] } });
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
