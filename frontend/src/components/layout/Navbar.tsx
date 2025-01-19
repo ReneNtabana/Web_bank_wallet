@@ -1,13 +1,17 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { RootState } from '../../redux/store';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
+
+  // Hide navbar on welcome page
+  if (location.pathname === '/') return null;
 
   const handleLogout = () => {
     dispatch(logout());
@@ -19,7 +23,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/')}>
-            <h1 className="text-xl font-bold">Wallet App</h1>
+            <h1 className="text-xl font-bold">Wallet Bank</h1>
           </div>
           
           <div className="flex space-x-4">
