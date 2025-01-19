@@ -27,7 +27,7 @@ const connectDB = async () => {
     // Sync all models
     if (process.env.NODE_ENV === 'development') {
       // Import models with associations
-      import ('../models/index.js')
+      await import ('../models/index.js')
       await sequelize.sync({ alter: true });
       console.log('Database models synchronized');
     }
