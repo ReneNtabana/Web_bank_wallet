@@ -3,8 +3,9 @@ import { Account } from '../types';
 
 export interface CreateAccountData {
   name: string;
-  type: 'bank' | 'cash' | 'mobile_money' | 'other';
-  currency: string;
+  type: Account['type'];
+  balance: number;
+  currency?: string;
   description?: string;
 }
 

@@ -131,23 +131,64 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts }: AddTransac
           />
         </div>
 
-        <div>
-          <label htmlFor="account" className="block text-sm font-medium text-gray-700">
-            Account
-          </label>
-          <select
-            id="account"
-            value={formData.accountId}
-            onChange={(e) => setFormData({ ...formData, accountId: parseInt(e.target.value) })}
-            className="input"
-          >
-            {accounts.map(account => (
-              <option key={account.id} value={account.id}>
-                {account.name} ({account.type})
-              </option>
-            ))}
-          </select>
-        </div>
+        {formData.type === 'transfer' ? (
+          <>
+            <div>
+              <label htmlFor="fromAccount" className="block text-sm font-medium text-gray-700">
+                From Account
+              </label>
+              <select
+                id="fromAccount"
+                value={formData.accountId}
+                onChange={(e) => setFormData({ ...formData, accountId: parseInt(e.target.value) })}
+                className="input"
+              >
+                {accounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.name} ({formatCurrency(account.balance)})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="toAccount" className="block text-sm font-medium text-gray-700">
+                To Account
+              </label>
+              <select
+                id="toAccount"
+                value={formData.toAccountId || ''}
+                onChange={(e) => setFormData({ ...formData, toAccountId: parseInt(e.target.value) })}
+                className="input"
+              >
+                {accounts
+                  .filter(account => account.id !== formData.accountId)
+                  .map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.name} ({formatCurrency(account.balance)})
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </>
+        ) : (
+          <div>
+            <label htmlFor="account" className="block text-sm font-medium text-gray-700">
+              Account
+            </label>
+            <select
+              id="account"
+              value={formData.accountId}
+              onChange={(e) => setFormData({ ...formData, accountId: parseInt(e.target.value) })}
+              className="input"
+            >
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>
+                  {account.name} ({formatCurrency(account.balance)})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {formData.type !== 'transfer' && (
           <>

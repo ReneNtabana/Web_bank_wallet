@@ -4,24 +4,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { login } from '../redux/slices/authSlice';
 import { RootState } from '../redux/store';
+import { AppDispatch } from '../redux/store';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // e.preventDefault();
-    // try {
-    //   const result = await dispatch(login({ email, password })).unwrap();
-    //   if (result) {
-    //     navigate('/dashboard');
-    //   }
-    // } catch (err: any) {
-    //   console.error(err?.message || 'Login failed');
-    // }
+    e.preventDefault();
+    try {
+      const result = await dispatch(login({ email, password })).unwrap();
+      if (result) {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err?.message || 'Login failed');
+    }
   };
 
   return (

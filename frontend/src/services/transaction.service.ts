@@ -1,5 +1,6 @@
 import api from './api';
 import { Transaction } from '../types';
+import accountService from './account.service';
 
 export interface CreateTransactionData {
   type: 'income' | 'expense' | 'transfer';
@@ -8,6 +9,7 @@ export interface CreateTransactionData {
   categoryId: number;
   description?: string;
   date?: Date;
+  toAccountId?: number;
 }
 
 const transactionService = {
@@ -29,8 +31,21 @@ const transactionService = {
     return response.data;
   },
 
-  createTransaction: async (data: CreateTransactionData) => {
-    const response = await api.post<Transaction>('/transactions', data);
+  createTransaction: async (data: CreateTransactionData): Promise<Transaction> => {
+    const response = await api.post('/transactions', data);
+    
+    // If it's a transfer, update both accounts
+    if (data.type === 'transfer' && data.toAccountId) {
+      await Promise.all([
+        accountService.updateAccount(data.accountId, { balance: -data.amount }),
+        accountService.updateAccount(data.toAccountId, { balance: data.amount })
+      ]);
+    } else {
+      // For regular transactions, just update one account
+      const amount = data.type === 'income' ? data.amount : -data.amount;
+      await accountService.updateAccount(data.accountId, { balance: amount });
+    }
+    
     return response.data;
   },
 
