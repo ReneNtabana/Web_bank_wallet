@@ -15,7 +15,8 @@ const sequelize = new Sequelize({
     max: 5,
     min: 0,
     acquire: 30000,
-    idle: 10000
+    idle: 10000,
+    rejectOnError: false
   }
 });
 
@@ -27,7 +28,7 @@ const connectDB = async () => {
     // Sync all models
     if (process.env.NODE_ENV === 'development') {
       // Import models with associations
-      await import ('../models/index.js')
+     await import ('../models/index.js')
       await sequelize.sync({ alter: true });
       console.log('Database models synchronized');
     }

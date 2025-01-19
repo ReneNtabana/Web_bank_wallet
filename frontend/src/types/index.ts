@@ -33,23 +33,16 @@ export interface Transaction {
   type: 'income' | 'expense' | 'transfer';
   amount: number;
   description: string;
-  date: string;
+  date: Date;
+  category: Category;
+  account: Account;
+  toAccount?: Account;
   status: 'completed' | 'pending' | 'cancelled';
   accountId: number;
   categoryId: number;
-  category: {
-    id: number;
-    name: string;
-    color: string;
-    icon: string;
-  };
-  account: {
-    id: number;
-    name: string;
-    type: string;
-  };
   createdAt: string;
   updatedAt: string;
+  runningBalance?: number;
 }
 
 export interface Category {

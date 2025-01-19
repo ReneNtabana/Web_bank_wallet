@@ -13,7 +13,8 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit }: AddAccountModalProps) =>
     name: '',
     type: 'bank',
     currency: 'USD',
-    description: ''
+    description: '',
+    balance: 0
   });
   const [isLoading, setIsLoading] = useState(false);
 
