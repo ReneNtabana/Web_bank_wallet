@@ -59,12 +59,15 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts }: AddTransac
 
   // Update selected budget when category changes
   useEffect(() => {
-    const budget = budgets.find(b => 
-      b.categoryId === formData.categoryId && 
-      b.isActive &&
-      new Date(b.startDate || '') <= new Date(formData.date) &&
-      new Date(b.endDate || '') >= new Date(formData.date)
-    );
+    const budget = budgets.find(b => {
+      const startDate = b.startDate ? new Date(b.startDate) : null;
+      const endDate = b.endDate ? new Date(b.endDate) : null;
+      return b.categoryId === formData.categoryId && 
+        b.isActive &&
+        startDate && endDate && formData.date &&
+        startDate <= formData.date &&
+        endDate >= formData.date;
+    });
     setSelectedBudget(budget || null);
   }, [formData.categoryId, formData.date, budgets]);
 
