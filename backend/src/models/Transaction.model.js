@@ -49,10 +49,10 @@ const Transaction = sequelize.define('Transaction', {
     type: DataTypes.JSONB,
     defaultValue: []
   },
-  location: {
-    type: DataTypes.GEOMETRY('POINT'),
-    allowNull: true
-  }
+  // location: {
+  //   type: DataTypes.GEOMETRY('POINT'),
+  //   allowNull: true
+  // }
 }, {
   timestamps: true,
   indexes: [
