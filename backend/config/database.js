@@ -36,6 +36,7 @@ const initDatabase = async () => {
 };
 
 // Initialize connection
+
 initDatabase();
 
 export default sequelize;
