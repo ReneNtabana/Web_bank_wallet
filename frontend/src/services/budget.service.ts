@@ -31,10 +31,10 @@ export const budgetService = {
     return response.data;
   },
 
-  update: async (id: string, data: Partial<CreateBudgetDto>): Promise<Budget> => {
+  update: async (id: string, data: Partial<Budget>): Promise<Budget> => {
     const formattedData = {
       ...data,
-      categoryId: data.category,
+      categoryId: data.category?._id,
       notifications: data.notifications && {
         enabled: data.notifications.enabled,
         threshold: data.notifications.threshold || 80

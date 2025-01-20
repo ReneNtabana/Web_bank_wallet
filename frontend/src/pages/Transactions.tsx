@@ -6,6 +6,7 @@ import { accountService } from '../services/account.service';
 import { formatCurrency } from '../utils/format';
 import AddTransactionModal from '../components/dashboard/AddTransactionModal';
 import { formatDate } from '../utils/formatters';
+import { get } from 'http';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -50,6 +51,7 @@ const Transactions = () => {
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(cat => cat._id === categoryId);
+    console.log(category, "category");
     return category?.name || 'Unknown Category';
   };
 

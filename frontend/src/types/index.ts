@@ -105,9 +105,14 @@ export interface UpdateCategoryDto {
 
 export interface Budget {
   _id: string;
-  category: string;
+  category: {
+    _id: string;
+    name: string;
+    type: string;
+    color?: string;
+  };
   amount: number;
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  period: string;
   startDate: string;
   endDate: string;
   notifications: {
