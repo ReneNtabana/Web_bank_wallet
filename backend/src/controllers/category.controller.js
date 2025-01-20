@@ -1,24 +1,24 @@
-import { Category } from '../models/index.js';
+import { Category } from '../models/Category.model.js';
 import { validationResult } from 'express-validator';
 
 // @desc    Create new category
 // @route   POST /api/categories
 // @access  Private
-const createCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, type, parentId, color, icon } = req.body;
+    const { name, type, color, icon } = req.body;
+
     const category = await Category.create({
-      userId: req.user.id,
       name,
       type,
-      parentId,
       color,
-      icon
+      icon,
+      user: req.user._id
     });
 
     res.status(201).json(category);
@@ -27,24 +27,18 @@ const createCategory = async (req, res) => {
   }
 };
 
-// @desc    Get all categories for user
+// @desc    Get all categories
 // @route   GET /api/categories
 // @access  Private
-const getCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll({
-      where: { 
-        userId: req.user.id,
-        parentId: null // Get only parent categories
-      },
-      include: [{
-        model: Category,
-        as: 'subcategories',
-        include: ['subcategories'] // Recursive include for nested categories
-      }],
-      order: [['name', 'ASC']]
-    });
-
+    const categories = await Category.find({ 
+      $or: [
+        { user: req.user._id },
+        { user: null } // Include default categories
+      ]
+    }).sort({ name: 1 });
+    
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -54,17 +48,14 @@ const getCategories = async (req, res) => {
 // @desc    Get single category
 // @route   GET /api/categories/:id
 // @access  Private
-const getCategory = async (req, res) => {
+export const getCategory = async (req, res) => {
   try {
     const category = await Category.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      },
-      include: [{
-        model: Category,
-        as: 'subcategories'
-      }]
+      _id: req.params.id,
+      $or: [
+        { user: req.user._id },
+        { user: null }
+      ]
     });
 
     if (!category) {
@@ -80,31 +71,29 @@ const getCategory = async (req, res) => {
 // @desc    Update category
 // @route   PUT /api/categories/:id
 // @access  Private
-const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res) => {
   try {
     const category = await Category.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
+      _id: req.params.id,
+      user: req.user._id
     });
 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    const { name, type, parentId, color, icon, isActive } = req.body;
-    
-    await category.update({
-      name: name || category.name,
-      type: type || category.type,
-      parentId: parentId || category.parentId,
-      color: color || category.color,
-      icon: icon || category.icon,
-      isActive: isActive !== undefined ? isActive : category.isActive
-    });
+    // Don't allow updating default categories
+    if (!category.user) {
+      return res.status(403).json({ message: 'Cannot modify default categories' });
+    }
 
-    res.json(category);
+    const updatedCategory = await Category.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: req.body },
+      { new: true }
+    );
+
+    res.json(updatedCategory);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -113,30 +102,25 @@ const updateCategory = async (req, res) => {
 // @desc    Delete category
 // @route   DELETE /api/categories/:id
 // @access  Private
-const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
+      _id: req.params.id,
+      user: req.user._id
     });
 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    await category.destroy();
+    // Don't allow deleting default categories
+    if (!category.user) {
+      return res.status(403).json({ message: 'Cannot delete default categories' });
+    }
+
+    await category.deleteOne();
     res.json({ message: 'Category removed' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
-};
-
-export {
-  createCategory,
-  getCategories,
-  getCategory,
-  updateCategory,
-  deleteCategory
 }; 

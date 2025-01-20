@@ -1,11 +1,11 @@
-import { Budget, Category, Transaction } from '../models/index.js';
+import { Budget } from '../models/Budget.model.js';
+import { Transaction } from '../models/Transaction.model.js';
 import { validationResult } from 'express-validator';
-import { Op } from 'sequelize';
 
 // @desc    Create new budget
 // @route   POST /api/budgets
 // @access  Private
-const createBudget = async (req, res) => {
+export const createBudget = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -15,13 +15,13 @@ const createBudget = async (req, res) => {
     const { categoryId, amount, period, startDate, endDate, notifications } = req.body;
 
     const budget = await Budget.create({
-      userId: req.user.id,
-      categoryId,
+      category: categoryId,
       amount,
       period,
       startDate,
       endDate,
-      notifications
+      notifications,
+      user: req.user._id
     });
 
     res.status(201).json(budget);
@@ -30,41 +30,17 @@ const createBudget = async (req, res) => {
   }
 };
 
-// @desc    Get all budgets for user
+// @desc    Get all budgets
 // @route   GET /api/budgets
 // @access  Private
-const getBudgets = async (req, res) => {
+export const getBudgets = async (req, res) => {
   try {
-    const budgets = await Budget.findAll({
-      where: { 
-        userId: req.user.id,
-        endDate: {
-          [Op.gte]: new Date()
-        }
-      },
-      include: [{
-        model: Category,
-        attributes: ['name', 'type']
-      }],
-      order: [['startDate', 'ASC']]
-    });
-
-    // Calculate current spending for each budget
-    for (let budget of budgets) {
-      const spending = await Transaction.sum('amount', {
-        where: {
-          userId: req.user.id,
-          categoryId: budget.categoryId,
-          type: 'expense',
-          date: {
-            [Op.between]: [budget.startDate, budget.endDate]
-          }
-        }
-      });
-
-      budget.currentSpending = spending || 0;
-      await budget.save();
-    }
+    const budgets = await Budget.find({ 
+      user: req.user._id,
+      endDate: { $gte: new Date() }
+    })
+    .populate('category', 'name type')
+    .sort({ startDate: 1 });
 
     res.json(budgets);
   } catch (error) {
@@ -72,147 +48,52 @@ const getBudgets = async (req, res) => {
   }
 };
 
-// @desc    Get single budget
-// @route   GET /api/budgets/:id
-// @access  Private
-const getBudget = async (req, res) => {
-  try {
-    const budget = await Budget.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      },
-      include: [{
-        model: Category,
-        attributes: ['name', 'type']
-      }]
-    });
-
-    if (!budget) {
-      return res.status(404).json({ message: 'Budget not found' });
-    }
-
-    // Calculate current spending
-    const spending = await Transaction.sum('amount', {
-      where: {
-        userId: req.user.id,
-        categoryId: budget.categoryId,
-        type: 'expense',
-        date: {
-          [Op.between]: [budget.startDate, budget.endDate]
-        }
-      }
-    });
-
-    budget.currentSpending = spending || 0;
-    await budget.save();
-
-    res.json(budget);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// @desc    Update budget
-// @route   PUT /api/budgets/:id
-// @access  Private
-const updateBudget = async (req, res) => {
-  try {
-    const budget = await Budget.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (!budget) {
-      return res.status(404).json({ message: 'Budget not found' });
-    }
-
-    const { amount, period, startDate, endDate, notifications, isActive } = req.body;
-    
-    await budget.update({
-      amount: amount || budget.amount,
-      period: period || budget.period,
-      startDate: startDate || budget.startDate,
-      endDate: endDate || budget.endDate,
-      notifications: notifications || budget.notifications,
-      isActive: isActive !== undefined ? isActive : budget.isActive
-    });
-
-    res.json(budget);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// @desc    Delete budget
-// @route   DELETE /api/budgets/:id
-// @access  Private
-const deleteBudget = async (req, res) => {
-  try {
-    const budget = await Budget.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (!budget) {
-      return res.status(404).json({ message: 'Budget not found' });
-    }
-
-    await budget.destroy();
-    res.json({ message: 'Budget removed' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// @desc    Get budget status and notifications
+// @desc    Get budget status
 // @route   GET /api/budgets/status
 // @access  Private
-const getBudgetStatus = async (req, res) => {
+export const getBudgetStatus = async (req, res) => {
   try {
-    const budgets = await Budget.findAll({
-      where: { 
-        userId: req.user.id,
-        isActive: true,
-        endDate: {
-          [Op.gte]: new Date()
-        }
-      },
-      include: [{
-        model: Category,
-        attributes: ['name', 'type']
-      }]
-    });
+    const budgets = await Budget.find({
+      user: req.user._id,
+      isActive: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    }).populate('category', 'name type');
 
     const budgetStatus = await Promise.all(budgets.map(async (budget) => {
-      const spending = await Transaction.sum('amount', {
-        where: {
-          userId: req.user.id,
-          categoryId: budget.categoryId,
-          type: 'expense',
-          date: {
-            [Op.between]: [budget.startDate, budget.endDate]
+      const spending = await Transaction.aggregate([
+        {
+          $match: {
+            user: req.user._id,
+            category: budget.category._id,
+            type: 'expense',
+            date: {
+              $gte: budget.startDate,
+              $lte: budget.endDate
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$amount' }
           }
         }
-      }) || 0;
+      ]);
 
-      const spendingPercentage = (spending / budget.amount) * 100;
-      const isThresholdExceeded = budget.notifications?.enabled && 
-        spendingPercentage >= (budget.notifications.threshold || 80);
+      const currentSpending = spending[0]?.total || 0;
+      const spendingPercentage = (currentSpending / budget.amount) * 100;
 
       return {
-        id: budget.id,
-        category: budget.Category.name,
+        id: budget._id,
+        category: budget.category.name,
         amount: budget.amount,
-        spent: spending,
-        remaining: budget.amount - spending,
+        spent: currentSpending,
+        remaining: budget.amount - currentSpending,
         spendingPercentage,
         period: budget.period,
-        isThresholdExceeded,
+        isThresholdExceeded: budget.notifications?.enabled && 
+          spendingPercentage >= (budget.notifications.threshold || 80),
         threshold: budget.notifications?.threshold || 80
       };
     }));
@@ -223,11 +104,63 @@ const getBudgetStatus = async (req, res) => {
   }
 };
 
-export {
-  createBudget,
-  getBudgets,
-  getBudget,
-  updateBudget,
-  deleteBudget,
-  getBudgetStatus
+// @desc    Get single budget
+// @route   GET /api/budgets/:id
+// @access  Private
+export const getBudget = async (req, res) => {
+  try {
+    const budget = await Budget.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    }).populate('category', 'name type');
+
+    if (!budget) {
+      return res.status(404).json({ message: 'Budget not found' });
+    }
+
+    res.json(budget);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Update budget
+// @route   PUT /api/budgets/:id
+// @access  Private
+export const updateBudget = async (req, res) => {
+  try {
+    const budget = await Budget.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: req.body },
+      { new: true }
+    ).populate('category', 'name type');
+
+    if (!budget) {
+      return res.status(404).json({ message: 'Budget not found' });
+    }
+
+    res.json(budget);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Delete budget
+// @route   DELETE /api/budgets/:id
+// @access  Private
+export const deleteBudget = async (req, res) => {
+  try {
+    const budget = await Budget.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id
+    });
+
+    if (!budget) {
+      return res.status(404).json({ message: 'Budget not found' });
+    }
+
+    res.json({ message: 'Budget removed' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 }; 

@@ -1,12 +1,24 @@
 import { check } from 'express-validator';
 
-const categoryValidator = [
-  check('name', 'Name is required').not().isEmpty(),
-  check('type', 'Invalid category type').isIn(['income', 'expense']),
-  check('parentId').optional().isInt(),
-  check('color').optional().matches(/^#[0-9A-Fa-f]{6}$/),
-  check('icon').optional().isString(),
-  check('isActive').optional().isBoolean()
-];
+export const categoryValidator = [
+  check('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Category name is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Category name must be between 2 and 50 characters'),
 
-export { categoryValidator }; 
+  check('type')
+    .isIn(['income', 'expense'])
+    .withMessage('Invalid category type'),
+
+  check('color')
+    .optional()
+    .isHexColor()
+    .withMessage('Invalid color format'),
+
+  check('icon')
+    .optional()
+    .isString()
+    .withMessage('Icon must be a string')
+]; 
