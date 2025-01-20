@@ -21,16 +21,19 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   }
 });
 
-// Test the connection
-const testConnection = async () => {
+// Test and initialize connection
+const initDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connection successful');
+    // Sync database (be careful with force: true in production)
+    await sequelize.sync();
+    console.log('Database synchronized');
   } catch (error) {
     console.error('Unable to connect to database:', error);
   }
 };
 
-testConnection();
+initDatabase();
 
 export default sequelize;
