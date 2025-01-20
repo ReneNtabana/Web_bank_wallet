@@ -141,6 +141,7 @@ const Navbar = () => {
                         Settings
                       </Link>
                       <button
+                        type='button'
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100"
                         role="menuitem"
