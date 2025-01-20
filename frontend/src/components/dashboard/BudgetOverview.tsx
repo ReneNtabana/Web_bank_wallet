@@ -5,7 +5,11 @@ import { formatCurrency } from '../../utils/format';
 
 interface BudgetStatus {
   id: number;
-  category: string;
+   category: {
+    name: string;
+    _id: string;
+    type: string;
+  };
   amount: number;
   spent: number;
   remaining: number;
