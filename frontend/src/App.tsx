@@ -20,8 +20,8 @@ const AppRoutes = () => {
 
   return (
     <div className="h-screen bg-gray-50">
-      <Navbar />
-      <main className="py-16">
+      <div className="mb-16"><Navbar /></div>
+      <main>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
