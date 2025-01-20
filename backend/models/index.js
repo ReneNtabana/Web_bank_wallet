@@ -1,20 +1,23 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const process = require('process');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { Sequelize } from 'sequelize';
+import config from '../config/database.js';
+import process from 'process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
+if (env === 'production') {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
+    protocol: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
@@ -22,10 +25,16 @@ if (config.use_env_variable) {
       }
     }
   });
+} else {
+  sequelize = new Sequelize(
+    config[env].database,
+    config[env].username,
+    config[env].password,
+    config[env]
+  );
 }
 
-fs
-  .readdirSync(__dirname)
+fs.readdirSync(__dirname)
   .filter(file => {
     return (
       file.indexOf('.') !== 0 &&
