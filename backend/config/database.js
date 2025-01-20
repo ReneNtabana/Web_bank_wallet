@@ -26,11 +26,13 @@ const initDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connection successful');
-    // Sync database (be careful with force: true in production)
     await sequelize.sync();
     console.log('Database synchronized');
   } catch (error) {
-    console.error('Unable to connect to database:', error);
+    console.error('Connection error details:', {
+      url: process.env.DATABASE_URL?.split('@')[1], // Log only host part for security
+      error: error.message
+    });
   }
 };
 
