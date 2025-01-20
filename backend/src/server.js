@@ -6,7 +6,6 @@ import sequelize from '../config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import accountRoutes from './routes/account.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
-import sequelize from '../config/database.js';
 
 dotenv.config();
 
