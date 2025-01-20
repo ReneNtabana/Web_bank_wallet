@@ -61,13 +61,13 @@ export interface Transaction {
 }
 
 export interface CreateTransactionDto {
-  account: string;
-  toAccount?: string | undefined;
-  category?: string;
+  accountId: string;
+  categoryId: string;
   amount: number;
   type: 'income' | 'expense' | 'transfer';
   description?: string;
-  date: string | undefined;
+  date?: string;
+  customCategory?: string;
 }
 
 export interface UpdateTransactionDto {
@@ -112,7 +112,7 @@ export interface Budget {
   endDate: string;
   notifications: {
     enabled: boolean;
-    threshold?: number;
+    threshold: number;
   };
   currentSpending: number;
   isActive: boolean;
@@ -126,6 +126,6 @@ export interface CreateBudgetDto {
   endDate: string;
   notifications?: {
     enabled: boolean;
-    threshold?: number;
+    threshold: number;
   };
 }

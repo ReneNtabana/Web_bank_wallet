@@ -5,13 +5,14 @@ import { motion } from 'framer-motion';
 import { RootState } from '../redux/store';
 import { accountService } from '../services/account.service';
 import transactionService from '../services/transaction.service';
+import { categoryService } from '../services/category.service';
 import WelcomeSection from '../components/dashboard/WelcomeSection';
 import QuickStats from '../components/dashboard/QuickStats';
 import AccountsList from '../components/dashboard/AccountsList';
 import TransactionsList from '../components/dashboard/TransactionsList';
 import AddAccountModal from '../components/dashboard/AddAccountModal';
 import AddTransactionModal from '../components/dashboard/AddTransactionModal';
-import { CreateTransactionDto } from '../types';
+import { Category, CreateTransactionDto } from '../types';
 import { Account, Transaction, CreateAccountDto } from '../types';
 import BudgetOverview from '../components/dashboard/BudgetOverview';
 
@@ -23,24 +24,22 @@ const Dashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
-  const [categories] = useState([
-    { id: 1, name: 'Food & Dining' },
-    { id: 2, name: 'Transportation' },
-    { id: 3, name: 'Shopping' },
-    { id: 4, name: 'Bills & Utilities' },
-    // Add more categories as needed
-  ]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [accountsData, transactionsData] = await Promise.all([
+        setIsLoading(false);
+        const [accountsData, transactionsData, categoriesData] = await Promise.all([
           accountService.getAll(),
-          transactionService.getAll({ limit: 5 })
+          transactionService.getAll({ limit: 5 }),
+          categoryService.getAll()
         ]);
+        console.log('Dashboard data:', { accountsData, transactionsData, categoriesData });
 
         setAccounts(accountsData);
         setRecentTransactions(transactionsData);
+        setCategories(categoriesData);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -67,15 +66,17 @@ const Dashboard = () => {
       
       // Update account balance
       const updatedAccounts = accounts.map(account => {
-        if (account._id === data.account) {
-          const balanceChange = data.type === 'income' ? data.amount : -data.amount;
+        if (account._id === data.accountId) {
+          const balanceChange = data.type === 'expense' ? -data.amount : data.amount;
           return { ...account, balance: account.balance + balanceChange };
         }
         return account;
       });
       setAccounts(updatedAccounts);
+      
+      setIsAddTransactionModalOpen(false);
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      console.error('Error adding transaction:', error);
     }
   };
 
@@ -102,6 +103,7 @@ const Dashboard = () => {
       />
       <TransactionsList 
         transactions={recentTransactions} 
+        accounts={accounts}
         onNewTransaction={() => setIsAddTransactionModalOpen(true)} 
       />
 
@@ -109,6 +111,7 @@ const Dashboard = () => {
         isOpen={isAddAccountModalOpen}
         onClose={() => setIsAddAccountModalOpen(false)}
         onSubmit={handleAddAccount}
+        isLoading={isLoading}
       />
 
       <AddTransactionModal
@@ -116,6 +119,7 @@ const Dashboard = () => {
         onClose={() => setIsAddTransactionModalOpen(false)}
         onSubmit={handleAddTransaction}
         accounts={accounts}
+        categories={categories}
       />
     </div>
   );

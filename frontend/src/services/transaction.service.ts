@@ -5,6 +5,7 @@ import { accountService } from './account.service';
 export const transactionService = {
   getAll: async (params?: { limit?: number }): Promise<Transaction[]> => {
     const response = await api.get('/transactions', { params });
+    console.log('Transactions response:', response.data);
     return response.data;
   },
 
@@ -17,15 +18,15 @@ export const transactionService = {
     const response = await api.post('/transactions', data);
     
     // If it's a transfer, update both accounts
-    if (data.type === 'transfer' && data.toAccount) {
+    if (data.type === 'transfer' && data.accountId) {
       await Promise.all([
-        accountService.update(data.account, { balance: -data.amount }),
-        accountService.update(data.toAccount, { balance: data.amount })
+        accountService.update(data.accountId, { balance: -data.amount }),
+        accountService.update(data.accountId, { balance: data.amount })
       ]);
     } else {
       // For regular transactions, just update one account
       const amount = data.type === 'income' ? data.amount : -data.amount;
-      await accountService.update(data.account, { balance: amount });
+      await accountService.update(data.accountId, { balance: amount });
     }
     
     return response.data;

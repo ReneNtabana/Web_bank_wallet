@@ -14,32 +14,41 @@ const Budgets = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBudgets = async () => {
       try {
         const [budgetsData, categoriesData] = await Promise.all([
           budgetService.getAll(),
           categoryService.getAll()
         ]);
+        console.log('Budgets:', budgetsData);
+        console.log('Categories:', categoriesData);
         setBudgets(budgetsData);
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error fetching budgets:', error);
+        setError('Failed to load budgets');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchData();
+    fetchBudgets();
   }, []);
 
-    const handleAddBudget = async (data: CreateBudgetDto) => {
+  const handleAddBudget = async (data: CreateBudgetDto) => {
     try {
+      setIsLoading(true);
       const newBudget = await budgetService.create(data);
       setBudgets([...budgets, newBudget]);
+      setIsAddModalOpen(false);
     } catch (error) {
       console.error('Error creating budget:', error);
+      setError('Failed to create budget');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,6 +76,14 @@ const Budgets = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center text-red-600 mt-4">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -79,15 +96,19 @@ const Budgets = () => {
         </button>
       </div>
 
-      <div className="grid gap-6">
-        {budgets.map(budget => (
-          <BudgetCard 
-            key={budget._id} 
-            budget={budget} 
-            onEdit={handleEditClick}
-          />
-        ))}
-      </div>
+      {budgets.length === 0 ? (
+        <p className="text-center text-gray-500 mt-4">No budgets yet</p>
+      ) : (
+        <div className="grid gap-6">
+          {budgets.map(budget => (
+            <BudgetCard 
+              key={budget._id} 
+              budget={budget} 
+              onEdit={handleEditClick}
+            />
+          ))}
+        </div>
+      )}
 
       <AddBudgetModal
         isOpen={isAddModalOpen}
@@ -123,8 +144,7 @@ const BudgetCard = ({ budget, onEdit }: { budget: Budget; onEdit: (budget: Budge
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold">{budget.category}</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-md text-black font-bold">
             {budget.period.charAt(0).toUpperCase() + budget.period.slice(1)} Budget
           </p>
           <p className="text-sm text-gray-500">
