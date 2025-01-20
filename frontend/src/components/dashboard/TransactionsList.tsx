@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { Transaction } from '../../types';
+import { Transaction, Account } from '../../types';
+import { formatDate } from '../../utils/formatters';
 
 interface TransactionsListProps {
   transactions: Transaction[];
@@ -7,56 +7,64 @@ interface TransactionsListProps {
 }
 
 const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListProps) => {
+  const getTransactionIcon = (type: Transaction['type']) => {
+    switch (type) {
+      case 'income':
+        return '↑';
+      case 'expense':
+        return '↓';
+      case 'transfer':
+        return '↔';
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      className="bg-white p-6 rounded-lg shadow-lg"
-    >
-      <div className="flex justify-between items-center mb-6">
+    <div className="mt-8">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Recent Transactions</h2>
-        <button onClick={onNewTransaction} className="btn btn-primary">
-          New Transaction
+        <button
+          onClick={onNewTransaction}
+          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+        >
+          Add Transaction
         </button>
       </div>
-      <div className="space-y-4">
-        {transactions.map((transaction) => (
-          <div
-            key={transaction.id}
-            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-          >
-            <div className="flex items-center space-x-4">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: transaction.category.color }}
-              />
-              <div>
-                <p className="font-medium">{transaction.description}</p>
-                <p className="text-sm text-gray-500">
-                  {transaction.category.name} • {new Date(transaction.date).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <p
-              className={`font-bold ${
-                transaction.type === 'income'
-                  ? 'text-green-600'
-                  : transaction.type === 'expense'
-                  ? 'text-red-600'
-                  : 'text-gray-600'
-              }`}
-            >
-              {transaction.type === 'income' ? '+' : '-'} 
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-              }).format(Math.abs(transaction.amount))}
-            </p>
-          </div>
-        ))}
+
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        {transactions.length === 0 ? (
+          <p className="text-center py-4 text-gray-500">No transactions yet</p>
+        ) : (
+          <ul className="divide-y divide-gray-200">
+            {transactions.map((transaction) => (
+              <li key={transaction._id} className="p-4 hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">{getTransactionIcon(transaction.type)}</span>
+                    <div>
+                      <p className="font-medium">{transaction.description || 'No description'}</p>
+                      <p className="text-sm text-gray-500">
+                        {transaction.date ? formatDate(new Date(transaction.date)) : 'No date'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`text-right ${
+                    transaction.type === 'income' ? 'text-green-600' : 
+                    transaction.type === 'expense' ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    <p className="font-medium">
+                      {transaction.type === 'expense' ? '-' : ''}${transaction.amount}
+                    </p>
+                  </div>
+                </div>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {transaction.account}
+                </td>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

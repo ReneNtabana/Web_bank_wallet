@@ -1,28 +1,28 @@
 import api from './api';
-import { Budget, CreateBudgetData } from '../types';
+import { Budget, CreateBudgetDto } from '../types';
 
-const budgetService = {
-  getBudgets: async () => {
-    const response = await api.get<Budget[]>('/budgets');
+export const budgetService = {
+  getAll: async (): Promise<Budget[]> => {
+    const response = await api.get('/budgets');
     return response.data;
   },
 
-  getBudget: async (id: number) => {
-    const response = await api.get<Budget>(`/budgets/${id}`);
+  getById: async (id: string): Promise<Budget> => {
+    const response = await api.get(`/budgets/${id}`);
     return response.data;
   },
 
-  createBudget: async (data: CreateBudgetData) => {
-    const response = await api.post<Budget>('/budgets', data);
+  create: async (data: CreateBudgetDto): Promise<Budget> => {
+    const response = await api.post('/budgets', data);
     return response.data;
   },
 
-  updateBudget: async (id: number, data: Partial<CreateBudgetData>) => {
-    const response = await api.put<Budget>(`/budgets/${id}`, data);
+  update: async (id: string, data: Partial<CreateBudgetDto>): Promise<Budget> => {
+    const response = await api.put(`/budgets/${id}`, data);
     return response.data;
   },
 
-  deleteBudget: async (id: number) => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/budgets/${id}`);
   },
 
@@ -30,6 +30,4 @@ const budgetService = {
     const response = await api.get('/budgets/status');
     return response.data;
   }
-};
-
-export default budgetService; 
+}; 

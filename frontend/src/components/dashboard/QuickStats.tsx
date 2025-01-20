@@ -7,7 +7,23 @@ interface QuickStatsProps {
 }
 
 const QuickStats = ({ accounts, recentTransactions }: QuickStatsProps) => {
-  const totalBalance = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+  const getTotalBalance = () => {
+    return accounts.reduce((sum, account) => sum + account.balance, 0);
+  };
+
+  const getMonthlyIncome = () => {
+    const thisMonth = new Date().getMonth();
+    return recentTransactions
+      .filter(t => t.date && new Date(t.date).getMonth() === thisMonth && t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+  };
+
+  const getMonthlyExpenses = () => {
+    const thisMonth = new Date().getMonth();
+    return recentTransactions
+      .filter(t => t.date && new Date(t.date).getMonth() === thisMonth && t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+  };
 
   return (
     <motion.div 
@@ -16,22 +32,23 @@ const QuickStats = ({ accounts, recentTransactions }: QuickStatsProps) => {
       transition={{ delay: 0.2 }}
       className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
     >
-      <div className="bg-black text-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-lg font-medium mb-2">Total Balance</h3>
-        <p className="text-3xl font-bold">
-          {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-          }).format(totalBalance)}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-gray-500 text-sm">Total Balance</h3>
+        <p className="text-2xl font-bold">${getTotalBalance().toFixed(2)}</p>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-gray-500 text-sm">Monthly Income</h3>
+        <p className="text-2xl font-bold text-green-600">
+          ${getMonthlyIncome().toFixed(2)}
         </p>
       </div>
-      <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-lg font-medium mb-2">Active Accounts</h3>
-        <p className="text-3xl font-bold">{accounts.length}</p>
-      </div>
-      <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-lg font-medium mb-2">Recent Activity</h3>
-        <p className="text-3xl font-bold">{recentTransactions.length}</p>
+
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-gray-500 text-sm">Monthly Expenses</h3>
+        <p className="text-2xl font-bold text-red-600">
+          ${getMonthlyExpenses().toFixed(2)}
+        </p>
       </div>
     </motion.div>
   );

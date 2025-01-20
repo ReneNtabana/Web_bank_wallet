@@ -1,38 +1,28 @@
 import api from './api';
-import { Account } from '../types';
+import { Account, CreateAccountDto, UpdateAccountDto } from '../types';
 
-export interface CreateAccountData {
-  name: string;
-  type: Account['type'];
-  balance: number;
-  currency?: string;
-  description?: string;
-}
-
-const accountService = {
-  getAccounts: async () => {
-    const response = await api.get<Account[]>('/accounts');
+export const accountService = {
+  getAll: async (): Promise<Account[]> => {
+    const response = await api.get('/accounts');
     return response.data;
   },
 
-  getAccount: async (id: number) => {
-    const response = await api.get<Account>(`/accounts/${id}`);
+  getById: async (id: string): Promise<Account> => {
+    const response = await api.get(`/accounts/${id}`);
     return response.data;
   },
 
-  createAccount: async (data: CreateAccountData) => {
-    const response = await api.post<Account>('/accounts', data);
+  create: async (data: CreateAccountDto): Promise<Account> => {
+    const response = await api.post('/accounts', data);
     return response.data;
   },
 
-  updateAccount: async (id: number, data: Partial<CreateAccountData>) => {
-    const response = await api.put<Account>(`/accounts/${id}`, data);
+  update: async (id: string, data: UpdateAccountDto): Promise<Account> => {
+    const response = await api.put(`/accounts/${id}`, data);
     return response.data;
   },
 
-  deleteAccount: async (id: number) => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/accounts/${id}`);
-  },
-};
-
-export default accountService; 
+  }
+}; 

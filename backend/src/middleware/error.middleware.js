@@ -1,9 +1,16 @@
 export const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  
-  res.status(statusCode).json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  console.error(err.stack);
+
+  if (err.name === 'MongooseServerSelectionError') {
+    return res.status(500).json({
+      message: 'Database connection error. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 };
 

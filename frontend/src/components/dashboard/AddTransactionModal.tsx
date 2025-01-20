@@ -1,266 +1,136 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Modal from '../common/Modal';
-import { CreateTransactionData } from '../../services/transaction.service';
-import { Account, Category, Budget } from '../../types';
-import categoryService from '../../services/category.service';
-import budgetService from '../../services/budget.service';
-import { formatCurrency } from '../../utils/format';
+import { Account, CreateTransactionDto } from '../../types';
 
-interface AddTransactionModalProps {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateTransactionData) => Promise<void>;
+  onSubmit: (data: CreateTransactionDto) => void;
   accounts: Account[];
 }
 
-const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts }: AddTransactionModalProps) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
-  const [formData, setFormData] = useState<CreateTransactionData>({
-    type: 'expense',
-    amount: 0,
-    accountId: accounts[0]?.id || 0,
-    categoryId: 0,
-    description: '',
-    date: new Date()
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts }: Props) => {
+  const [account, setAccount] = useState('');
+  const [toAccount, setToAccount] = useState('');
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [categoriesData, budgetsData] = await Promise.all([
-          categoryService.getCategories(),
-          budgetService.getBudgets()
-        ]);
-        setCategories(categoriesData);
-        setBudgets(budgetsData);
-        
-        // Set initial categoryId if categories exist
-        if (categoriesData.length > 0) {
-          setFormData(prev => ({
-            ...prev,
-            categoryId: categoriesData[0]?.id || 0
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchData();
-    }
-  }, [isOpen]);
-
-  // Update selected budget when category changes
-  useEffect(() => {
-    const budget = budgets.find(b => {
-      const startDate = b.startDate ? new Date(b.startDate) : null;
-      const endDate = b.endDate ? new Date(b.endDate) : null;
-      return b.categoryId === formData.categoryId && 
-        b.isActive &&
-        startDate && endDate && formData.date &&
-        startDate <= formData.date &&
-        endDate >= formData.date;
-    });
-    setSelectedBudget(budget || null);
-  }, [formData.categoryId, formData.date, budgets]);
-
-  const filteredCategories = categories.filter(
-    category => category.type === formData.type
-  );
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      await onSubmit(formData);
-      onClose();
-    } catch (error) {
-      console.error('Error adding transaction:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    if (!account) return; // Early return if no account selected
+    onSubmit({
+      account,
+      toAccount: type === 'transfer' ? toAccount : undefined,
+      amount: parseFloat(amount),
+      type,
+      description,
+      date
+    });
+    onClose();
+    // Reset form
+    setAccount('');
+    setToAccount('');
+    setAmount('');
+    setType('expense');
+    setDescription('');
+    setDate(new Date().toISOString().split('T')[0]);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Transaction">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-            Transaction Type
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Type</label>
           <select
-            id="type"
-            value={formData.type}
-            onChange={(e) => {
-              const newType = e.target.value as CreateTransactionData['type'];
-              setFormData(prev => ({
-                ...prev,
-                type: newType,
-                // Reset categoryId when type changes
-                categoryId: categories.find(c => c.type === newType)?.id || 0
-              }));
-            }}
-            className="input"
+            title="Type"
+            value={type}
+            onChange={(e) => setType(e.target.value as typeof type)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
           >
-            <option value="expense">Expense</option>
             <option value="income">Income</option>
+            <option value="expense">Expense</option>
             <option value="transfer">Transfer</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-            Amount
+          <label className="block text-sm font-medium text-gray-700">
+            {type === 'transfer' ? 'From Account' : 'Account'}
           </label>
-          <input
-            type="number"
-            id="amount"
-            min="0"
-            step="0.01"
-            value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-            className="input"
+          <select
+            title="Account"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             required
-          />
+          >
+            <option value="">Select Account</option>
+            {accounts.map((acc) => (
+              <option key={acc._id} value={acc._id}>
+                {acc.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {formData.type === 'transfer' ? (
-          <>
-            <div>
-              <label htmlFor="fromAccount" className="block text-sm font-medium text-gray-700">
-                From Account
-              </label>
-              <select
-                id="fromAccount"
-                value={formData.accountId}
-                onChange={(e) => setFormData({ ...formData, accountId: parseInt(e.target.value) })}
-                className="input"
-              >
-                {accounts.map(account => (
-                  <option key={account.id} value={account.id}>
-                    {account.name} ({formatCurrency(account.balance)})
+        {type === 'transfer' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">To Account</label>
+            <select
+              title="To Account"
+              value={toAccount}
+              onChange={(e) => setToAccount(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              required
+            >
+              <option value="">Select Account</option>
+              {accounts
+                .filter((acc) => acc._id !== account)
+                .map((acc) => (
+                  <option key={acc._id} value={acc._id}>
+                    {acc.name}
                   </option>
                 ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="toAccount" className="block text-sm font-medium text-gray-700">
-                To Account
-              </label>
-              <select
-                id="toAccount"
-                value={formData.toAccountId || ''}
-                onChange={(e) => setFormData({ ...formData, toAccountId: parseInt(e.target.value) })}
-                className="input"
-              >
-                {accounts
-                  .filter(account => account.id !== formData.accountId)
-                  .map(account => (
-                    <option key={account.id} value={account.id}>
-                      {account.name} ({formatCurrency(account.balance)})
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </>
-        ) : (
-          <div>
-            <label htmlFor="account" className="block text-sm font-medium text-gray-700">
-              Account
-            </label>
-            <select
-              id="account"
-              value={formData.accountId}
-              onChange={(e) => setFormData({ ...formData, accountId: parseInt(e.target.value) })}
-              className="input"
-            >
-              {accounts.map(account => (
-                <option key={account.id} value={account.id}>
-                  {account.name} ({formatCurrency(account.balance)})
-                </option>
-              ))}
             </select>
           </div>
         )}
 
-        {formData.type !== 'transfer' && (
-          <>
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                Category
-              </label>
-              {isLoadingCategories ? (
-                <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
-              ) : (
-                <select
-                  id="category"
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
-                  className="input"
-                >
-                  {filteredCategories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {selectedBudget && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Budget Information</h4>
-                <div className="text-sm text-gray-600">
-                  <p>Budget: {formatCurrency(selectedBudget?.amount ?? 0)}</p>
-                  <p>Spent: {formatCurrency(selectedBudget?.currentSpending ?? 0)}</p>
-                  <p>Remaining: {formatCurrency((selectedBudget?.amount ?? 0) - (selectedBudget?.currentSpending ?? 0))}</p>
-                  {(selectedBudget?.currentSpending ?? 0) / (selectedBudget?.amount ?? 1) > 0.8 && (
-                    <p className="text-yellow-600 mt-1">
-                      Warning: This transaction will put you over 80% of your budget
-                    </p>
-                  )}
-                  {(selectedBudget?.currentSpending ?? 0) + formData.amount > (selectedBudget?.amount ?? 0) && (
-                    <p className="text-red-600 mt-1">
-                      Warning: This transaction will exceed your budget
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-            Date
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Amount</label>
           <input
-            type="date"
-            id="date"
-            value={formData.date instanceof Date ? formData.date.toISOString().split('T')[0] : ''}
-            onChange={(e) => setFormData({ ...formData, date: new Date(e.target.value || '') })}
-            className="input"
+            title="Amount"
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             required
+            min="0.01"
+            step="0.01"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="input"
-            rows={2}
+          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <input
+            title="Description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date</label>
+          <input
+            title="Date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            required
           />
         </div>
 
@@ -268,16 +138,15 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts }: AddTransac
           <button
             type="button"
             onClick={onClose}
-            className="btn btn-secondary"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isLoading || isLoadingCategories}
-            className="btn btn-primary"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md"
           >
-            {isLoading ? 'Adding...' : 'Add Transaction'}
+            Add Transaction
           </button>
         </div>
       </form>
