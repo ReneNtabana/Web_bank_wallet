@@ -19,9 +19,9 @@ const AppRoutes = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50">
       <Navbar />
-      <main className="py-4">
+      <main className="">
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />

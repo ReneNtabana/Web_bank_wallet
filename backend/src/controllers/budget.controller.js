@@ -39,7 +39,10 @@ export const getBudgets = async (req, res) => {
       user: req.user._id,
       endDate: { $gte: new Date() }
     })
-    .populate('category', 'name type')
+    .populate({
+      path: 'category',
+      select: 'name type color'
+    })
     .sort({ startDate: 1 });
 
     res.json(budgets);
@@ -58,7 +61,10 @@ export const getBudgetStatus = async (req, res) => {
       isActive: true,
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() }
-    }).populate('category', 'name type');
+    }).populate({
+      path: 'category',
+      select: 'name type color'
+    });
 
     const budgetStatus = await Promise.all(budgets.map(async (budget) => {
       const spending = await Transaction.aggregate([
@@ -86,7 +92,7 @@ export const getBudgetStatus = async (req, res) => {
 
       return {
         id: budget._id,
-        category: budget.category.name,
+        category: budget.category,
         amount: budget.amount,
         spent: currentSpending,
         remaining: budget.amount - currentSpending,

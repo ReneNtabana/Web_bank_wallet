@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Welcome = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center text-white px-4">
+    <div className="h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center text-white px-4 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

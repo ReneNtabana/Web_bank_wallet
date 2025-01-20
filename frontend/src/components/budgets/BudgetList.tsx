@@ -8,9 +8,10 @@ interface BudgetListProps {
 }
 
 export const BudgetList = ({ budgets, categories, onEdit, onDelete }: BudgetListProps) => {
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(c => c._id === categoryId);
-    return category?.name || 'Unknown Category';
+  const getCategoryName = (category: string | { _id: string; name: string }) => {
+    return typeof category === 'string'
+      ? categories.find(c => c._id === category)?.name || 'Unknown Category'
+      : category.name || 'Unknown Category';
   };
 
   return (

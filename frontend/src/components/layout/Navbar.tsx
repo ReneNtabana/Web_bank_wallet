@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { logout } from '../../redux/slices/authSlice';
@@ -11,6 +11,7 @@ import { BellIcon } from '@heroicons/react/24/outline';
 const Navbar = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -23,10 +24,14 @@ const Navbar = () => {
     dispatch(logout());
   };
 
+  const isActivePath = (path: string) => {
+    return location.pathname === path;
+  };
+
   if (!user) return null;
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-lg z-50 transition-all duration-200">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -37,19 +42,31 @@ const Navbar = () => {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 to="/dashboard"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300"
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                  isActivePath('/dashboard')
+                    ? 'text-black border-black'
+                    : 'text-gray-500 border-transparent hover:border-gray-300'
+                }`}
               >
                 Dashboard
               </Link>
               <Link
                 to="/budgets"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-gray-300"
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                  isActivePath('/budgets')
+                    ? 'text-black border-black'
+                    : 'text-gray-500 border-transparent hover:border-gray-300'
+                }`}
               >
                 Budgets
               </Link>
               <Link
                 to="/transactions"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-gray-300"
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                  isActivePath('/transactions')
+                    ? 'text-black border-black'
+                    : 'text-gray-500 border-transparent hover:border-gray-300'
+                }`}
               >
                 Transactions
               </Link>

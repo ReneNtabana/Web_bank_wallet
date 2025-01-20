@@ -145,6 +145,9 @@ const BudgetCard = ({ budget, onEdit }: { budget: Budget; onEdit: (budget: Budge
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="text-md text-black font-bold">
+            {budget.category?.name || 'Unknown Category'}
+          </p>
+          <p className="text-md text-black font-bold">
             {budget.period.charAt(0).toUpperCase() + budget.period.slice(1)} Budget
           </p>
           <p className="text-sm text-gray-500">
