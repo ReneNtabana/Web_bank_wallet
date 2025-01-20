@@ -27,7 +27,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000', 
-    'https://web-bank-wallet.vercel.app/' 
+    'https://web-bank-wallet.vercel.app' 
   ],
   credentials: true
 }));
