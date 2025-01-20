@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import sequelize from '../config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import accountRoutes from './routes/account.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
@@ -10,16 +11,27 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*'
-}));
+// Basic middleware
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(cors());
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Health check endpoint
+app.get('/health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ 
+      status: 'healthy',
+      database: 'connected',
+      env: process.env.NODE_ENV
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'unhealthy',
+      database: 'disconnected',
+      error: error.message
+    });
+  }
 });
 
 // Routes
@@ -29,13 +41,9 @@ app.use('/api/accounts', accountRoutes);
 // Error handling
 app.use(errorHandler);
 
-// Export for Vercel
-export default app;
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
-// Only listen in development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
+export default app;

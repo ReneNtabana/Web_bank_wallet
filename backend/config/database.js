@@ -3,30 +3,39 @@ import { Sequelize } from 'sequelize';
 
 dotenv.config();
 
-let sequelize;
-
-if (process.env.NODE_ENV === 'production') {
-  sequelize = new Sequelize(process.env.DATABASE_URL, {
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      }
-    },
-    logging: false
-  });
-} else {
-  sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-      host: process.env.DB_HOST,
-      dialect: 'postgres',
-      logging: false
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
     }
-  );
-}
+  },
+  pool: {
+    max: 2,
+    min: 0,
+    acquire: 3000,
+    idle: 10000
+  }
+});
+
+// Initialize database connection
+const initDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
+    return true;
+  } catch (error) {
+    console.error('Database connection error:', {
+      error: error.message,
+      database_url_exists: !!process.env.DATABASE_URL,
+      env: process.env.NODE_ENV
+    });
+    return false;
+  }
+};
+
+// Initialize connection
+initDatabase();
 
 export default sequelize;
