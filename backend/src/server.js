@@ -10,10 +10,16 @@ import categoryRoutes from './routes/category.routes.js';
 import budgetRoutes from './routes/budget.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
 
+// Load env vars
 dotenv.config();
 
 // Connect to MongoDB
-await connectDB();
+try {
+  await connectDB();
+} catch (error) {
+  console.error('Failed to connect to MongoDB:', error);
+  process.exit(1);
+}
 
 const app = express();
 
@@ -48,5 +54,16 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-export default app;
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.error('Error:', err);
+  process.exit(1);
+});
 
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.error('Error:', err);
+  process.exit(1);
+});
+
+export default app;
