@@ -5,7 +5,7 @@ import { formatCurrency } from '../../utils/format';
 
 interface BudgetStatus {
   id: number;
-   category: {
+  category: {
     name: string;
     _id: string;
     type: string;
@@ -64,7 +64,7 @@ const BudgetOverview = () => {
                 className="flex items-center justify-between p-3 bg-red-50 rounded-lg"
               >
                 <div>
-                  <p className="font-medium">{budget.category}</p>
+                  <p className="font-medium">{budget.category.name}</p>
                   <p className="text-sm text-gray-600">
                     {budget.spendingPercentage.toFixed(1)}% spent of {formatCurrency(budget.amount)}
                   </p>
@@ -91,7 +91,7 @@ const BudgetOverview = () => {
               className="flex items-center justify-between p-3 border rounded-lg"
             >
               <div>
-                <p className="font-medium">{budget.category}</p>
+                <p className="font-medium">{budget.category.name}</p>
                 <p className="text-sm text-gray-600">
                   {budget.spendingPercentage.toFixed(1)}% spent
                 </p>
