@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch } from '../redux/store';
 import { motion } from 'framer-motion';
-// import { register } from '../redux/slices/authSlice';
+import { register } from '../redux/slices/authSlice';
 import { RootState } from '../redux/store';
 
 const Register = () => {
@@ -10,19 +11,19 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // try {
-    //   const result = await dispatch(register({ name, email, password })).unwrap();
-    //   if (result) {
-    //     navigate('/dashboard');
-    //   }
-    // } catch (err: any) {
-    //   console.error(err?.message || 'Registration failed');
-    // }
+    try {
+      const result = await dispatch(register({ name, email, password })).unwrap();
+      if (result) {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err?.message || 'Registration failed');
+    }
   };
 
   return (
