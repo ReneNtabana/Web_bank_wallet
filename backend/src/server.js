@@ -35,13 +35,10 @@ app.use('/api/accounts', accountRoutes);
 // Error handling
 app.use(errorHandler);
 
-// Export for Vercel
-export default app;
+// Always listen 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-// Only listen in development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
+export default app;
