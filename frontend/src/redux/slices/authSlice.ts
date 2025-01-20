@@ -1,8 +1,8 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { AuthState, User, ApiError } from '../../types';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const register = createAsyncThunk<
   User,
@@ -11,7 +11,7 @@ export const register = createAsyncThunk<
 >('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${API_URL}/auth/register`, userData);
-    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data));
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response.data);
@@ -25,7 +25,7 @@ export const login = createAsyncThunk<
 >('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data));
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response.data);
@@ -33,7 +33,7 @@ export const login = createAsyncThunk<
 });
 
 const initialState: AuthState = {
-  user: null,
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
   loading: false,
   error: null,
 };
@@ -42,9 +42,17 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    loginSuccess: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.loading = false;
+      state.error = null;
+      localStorage.setItem('user', JSON.stringify(action.payload));
+    },
     logout: (state) => {
       state.user = null;
-      localStorage.removeItem('token');
+      state.loading = false;
+      state.error = null;
+      localStorage.removeItem('user');
     },
     clearError: (state) => {
       state.error = null;

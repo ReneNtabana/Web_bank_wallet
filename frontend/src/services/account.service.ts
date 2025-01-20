@@ -4,6 +4,7 @@ import { Account, CreateAccountDto, UpdateAccountDto } from '../types';
 export const accountService = {
   getAll: async (): Promise<Account[]> => {
     const response = await api.get('/accounts');
+    console.log('Accounts response:', response.data);
     return response.data;
   },
 

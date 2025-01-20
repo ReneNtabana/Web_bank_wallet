@@ -6,9 +6,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateAccountDto) => void;
+  isLoading: boolean;
 }
 
-const AddAccountModal = ({ isOpen, onClose, onSubmit }: Props) => {
+const AddAccountModal = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<'bank' | 'cash' | 'mobile_money' | 'other'>('bank');
   const [balance, setBalance] = useState('');
@@ -98,9 +99,17 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit }: Props) => {
           </button>
           <button
             type="submit"
+            disabled={isLoading}
             className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md"
           >
-            Create Account
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Creating...
+              </div>
+            ) : (
+              'Create Account'
+            )}
           </button>
         </div>
       </form>

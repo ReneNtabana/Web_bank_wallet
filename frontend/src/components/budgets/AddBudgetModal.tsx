@@ -17,7 +17,7 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
     startDate: new Date().toISOString().split('T')[0] || '',
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0] || '',
     notifications: {
-      enabled: true,
+      enabled: false,
       threshold: 80
     }
   });
@@ -28,13 +28,42 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
     if (!categories.length) return;
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      // Format the data before submission
+      const budgetData = {
+        ...formData,
+        amount: Number(formData.amount),
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+      };
+      await onSubmit(budgetData);
       onClose();
     } catch (error) {
       console.error('Error adding budget:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === '' ? '' : parseInt(e.target.value);
+    setFormData({
+      ...formData,
+      notifications: {
+        enabled: true,
+        threshold: value === '' ? 0 : value
+      } as { enabled: boolean; threshold: number }
+    });
+  };
+
+  const handleNotificationsToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      notifications: {
+        ...formData.notifications,
+        enabled: e.target.checked,
+        threshold: formData.notifications?.threshold || 80
+      }
+    });
   };
 
   return (
@@ -127,13 +156,7 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
               type="checkbox"
               id="notificationsEnabled"
               checked={formData.notifications?.enabled}
-              onChange={(e) => setFormData({
-                ...formData,
-                notifications: {
-                  ...formData.notifications,
-                  enabled: e.target.checked
-                }
-              })}
+              onChange={handleNotificationsToggle}
               className="h-4 w-4 text-black border-gray-300 rounded"
             />
             <label htmlFor="notificationsEnabled" className="ml-2 block text-sm text-gray-700">
@@ -152,14 +175,8 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
                 min="1"
                 max="100"
                 value={formData.notifications.threshold}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  notifications: {
-                    ...formData.notifications,
-                    enabled: e.target.checked
-                  }
-                })}
-                className="input"
+                onChange={handleThresholdChange}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
           )}
@@ -178,7 +195,14 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
             disabled={isLoading}
             className="btn btn-primary"
           >
-            {isLoading ? 'Adding...' : 'Add Budget'}
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Creating...
+              </div>
+            ) : (
+              'Create Budget'
+            )}
           </button>
         </div>
       </form>

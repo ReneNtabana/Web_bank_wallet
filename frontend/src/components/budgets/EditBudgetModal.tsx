@@ -13,15 +13,11 @@ interface EditBudgetModalProps {
 
 const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: EditBudgetModalProps) => {
   const [formData, setFormData] = useState<Partial<Budget>>({
-    amount: 0,
-    period: 'monthly',
-    startDate: '',
-    endDate: '',
+    ...budget,
     notifications: {
-      enabled: true,
-      threshold: 80
-    } as { enabled: boolean; threshold?: number },
-    isActive: true
+      enabled: budget?.notifications?.enabled ?? false,
+      threshold: budget?.notifications?.threshold ?? 80
+    } as { enabled: boolean; threshold: number }
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +31,7 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
         notifications: {
           enabled: budget.notifications.enabled,
           threshold: budget.notifications.threshold || 80
-        },
+        } as { enabled: boolean; threshold: number },
         isActive: budget.isActive
       });
     }
@@ -54,6 +50,16 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNotificationsToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      notifications: {
+        enabled: e.target.checked,
+        threshold: formData.notifications?.threshold ?? 80
+      } as { enabled: boolean; threshold: number }
+    });
   };
 
   if (!budget) return null;
@@ -137,13 +143,7 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
               type="checkbox"
               id="notificationsEnabled"
               checked={formData.notifications?.enabled}
-              onChange={(e) => setFormData({
-                ...formData,
-                notifications: {
-                  ...formData.notifications,
-                  enabled: e.target.checked
-                }
-              })}
+              onChange={handleNotificationsToggle}
               className="h-4 w-4 text-black border-gray-300 rounded"
             />
             <label htmlFor="notificationsEnabled" className="ml-2 block text-sm text-gray-700">
@@ -162,13 +162,16 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
                 min="1"
                 max="100"
                 value={formData.notifications?.threshold}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  notifications: {
-                    enabled: formData.notifications?.enabled ?? true,
-                    threshold: parseInt(e.target.value)
-                  }
-                })}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                  setFormData({
+                    ...formData,
+                    notifications: {
+                      enabled: formData.notifications?.enabled ?? true,
+                      threshold: value === '' ? 0 : value
+                    } as { enabled: boolean; threshold: number }
+                  });
+                }}
                 className="input"
               />
             </div>

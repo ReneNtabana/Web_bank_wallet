@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Transaction, Account, Category, CreateTransactionDto } from '../types';
 import { transactionService } from '../services/transaction.service';
 import { accountService } from '../services/account.service';
-import { Transaction, Account } from '../types';
 import { formatCurrency } from '../utils/format';
+import AddTransactionModal from '../components/dashboard/AddTransactionModal';
+import { formatDate } from '../utils/formatters';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const handleAddTransaction = async (data: CreateTransactionDto) => {
+    try {
+      const newTransaction = await transactionService.create(data);
+      setTransactions([newTransaction, ...transactions]);
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,6 +43,16 @@ const Transactions = () => {
     fetchData();
   }, []);
 
+  const getAccountName = (accountId: string) => {
+    const account = accounts.find(acc => acc._id === accountId);
+    return account?.name || 'Unknown Account';
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(cat => cat._id === categoryId);
+    return category?.name || 'Unknown Category';
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -38,10 +62,10 @@ const Transactions = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Transactions</h1>
-        <button className="btn btn-primary">Add Transaction</button>
+        <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>Add Transaction</button>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -85,7 +109,7 @@ const Transactions = () => {
                   {transaction?.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction?.category}
+                  {getCategoryName(transaction.category)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatCurrency(transaction.amount)}
@@ -104,18 +128,24 @@ const Transactions = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.account}
+                  {getAccountName(transaction.account)}
                 </td>
-                {transaction.type === 'transfer' && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.toAccount}
-                  </td>
-                )}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {transaction.type === 'transfer' ? getAccountName(transaction.toAccount || '') : '-'}
+                </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <AddTransactionModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddTransaction}
+        accounts={accounts}
+        categories={categories}
+      />
     </div>
   );
 };

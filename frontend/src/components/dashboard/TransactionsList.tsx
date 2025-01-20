@@ -3,10 +3,11 @@ import { formatDate } from '../../utils/formatters';
 
 interface TransactionsListProps {
   transactions: Transaction[];
+  accounts: Account[];
   onNewTransaction: () => void;
 }
 
-const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListProps) => {
+const TransactionsList = ({ transactions, accounts, onNewTransaction }: TransactionsListProps) => {
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
       case 'income':
@@ -16,6 +17,11 @@ const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListPr
       case 'transfer':
         return '↔';
     }
+  };
+
+  const getAccountName = (accountId: string) => {
+    const account = accounts.find(acc => acc._id === accountId);
+    return account?.name || 'Unknown Account';
   };
 
   return (
@@ -35,7 +41,7 @@ const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListPr
           <p className="text-center py-4 text-gray-500">No transactions yet</p>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {transactions.map((transaction) => (
+            {[...transactions].reverse().map((transaction) => (
               <li key={transaction._id} className="p-4 hover:bg-gray-50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -45,6 +51,7 @@ const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListPr
                       <p className="text-sm text-gray-500">
                         {transaction.date ? formatDate(new Date(transaction.date)) : 'No date'}
                       </p>
+                      <p className="text-sm text-gray-500">{getAccountName(transaction.account)}</p>
                     </div>
                   </div>
                   <div className={`text-right ${
@@ -56,9 +63,6 @@ const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListPr
                     </p>
                   </div>
                 </div>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.account}
-                </td>
               </li>
             ))}
           </ul>
