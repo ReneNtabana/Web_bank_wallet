@@ -13,7 +13,7 @@ const generateToken = (id) => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-const register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -23,7 +23,7 @@ const register = async (req, res) => {
     const { name, email, password } = req.body;
 
     // Check if user exists
-    const userExists = await User.findOne({ where: { email } });
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -36,35 +36,26 @@ const register = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      token
-    });
+    if (user) {
+      res.status(201).json({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        token: generateToken(user._id),
+      });
+    }
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ 
-      message: 'Registration failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-const login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -74,7 +65,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({where: { email }  });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -86,7 +77,7 @@ const login = async (req, res) => {
     }
 
     res.json({
-      _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
@@ -99,17 +90,11 @@ const login = async (req, res) => {
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 // @access  Private
-const getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id, { attributes: { exclude: ['password'] } });
+    const user = await User.findById(req.user._id).select('-password');
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
-export {
-  register,
-  login,
-  getProfile
-}; 

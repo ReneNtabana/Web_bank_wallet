@@ -1,59 +1,59 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Budget = sequelize.define('Budget', {
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
+const budgetSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  categoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Categories',
-      key: 'id'
-    }
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
   },
   amount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+    type: Number,
+    required: true,
+    min: 0
   },
   period: {
-    type: DataTypes.ENUM('daily', 'weekly', 'monthly', 'yearly'),
-    defaultValue: 'monthly'
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'yearly'],
+    default: 'monthly'
   },
   startDate: {
-    type: DataTypes.DATE,
-    allowNull: false
+    type: Date,
+    required: true
   },
   endDate: {
-    type: DataTypes.DATE,
-    allowNull: false
+    type: Date,
+    required: true
   },
   notifications: {
-    type: DataTypes.JSONB,
-    defaultValue: {
-      enabled: true,
-      threshold: 80
+    enabled: {
+      type: Boolean,
+      default: true
+    },
+    threshold: {
+      type: Number,
+      default: 80,
+      min: 0,
+      max: 100
     }
   },
   currentSpending: {
-    type: DataTypes.DECIMAL(10, 2),
-    defaultValue: 0
+    type: Number,
+    default: 0
   },
   isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+    type: Boolean,
+    default: true
   }
 }, {
-  timestamps: true,
-  indexes: [
-    { fields: ['startDate', 'endDate'] }
-  ]
+  timestamps: true
 });
 
-export { Budget }; 
+// Add index for date range queries
+budgetSchema.index({ startDate: 1, endDate: 1 });
+
+export const Budget = mongoose.model('Budget', budgetSchema); 

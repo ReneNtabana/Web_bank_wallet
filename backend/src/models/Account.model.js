@@ -1,40 +1,30 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Account = sequelize.define('Account', {
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
-  },
+const accountSchema = new mongoose.Schema({
   name: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   type: {
-    type: DataTypes.ENUM('bank', 'cash', 'mobile_money', 'other'),
-    allowNull: false
+    type: String,
+    enum: ['bank', 'cash', 'mobile_money', 'other'],
+    required: true
   },
   balance: {
-    type: DataTypes.DECIMAL(10, 2),
-    defaultValue: 0
+    type: Number,
+    default: 0
   },
   currency: {
-    type: DataTypes.STRING,
-    defaultValue: 'USD'
+    type: String,
+    default: 'USD'
   },
-  description: {
-    type: DataTypes.TEXT
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, {
   timestamps: true
 });
 
-export { Account }; 
+export const Account = mongoose.model('Account', accountSchema); 

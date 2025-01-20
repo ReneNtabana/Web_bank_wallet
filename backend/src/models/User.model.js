@@ -1,41 +1,27 @@
-import { DataTypes } from 'sequelize';
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { sequelize } from '../config/database.js';
 
-const User = sequelize.define('User', {
+const userSchema = new mongoose.Schema({
   name: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
-    }
+    type: String,
+    required: true,
+    unique: true
   },
   password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      len: [6, 100]
-    }
+    type: String,
+    required: true
   }
 }, {
-  hooks: {
-    beforeCreate: async (user) => {
-      if (user.password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
-      }
-    }
-  }
+  timestamps: true
 });
 
 // Instance method to check password
-User.prototype.matchPassword = async function(enteredPassword) {
+userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-export  { User }; 
+export const User = mongoose.model('User', userSchema); 

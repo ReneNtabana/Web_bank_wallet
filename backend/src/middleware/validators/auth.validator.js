@@ -1,14 +1,44 @@
 import { check } from 'express-validator';
 
-const registerValidator = [
-  check('name', 'Name is required').not().isEmpty(),
-  check('email', 'Please include a valid email').isEmail(),
-  check('password', 'Password must be 6 or more characters').isLength({ min: 6 }),
+export const registerValidator = [
+  check('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters'),
+
+  check('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Invalid email format')
+    .normalizeEmail(),
+
+  check('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .matches(/\d/)
+    .withMessage('Password must contain at least one number')
+    .matches(/[a-zA-Z]/)
+    .withMessage('Password must contain at least one letter')
 ];
 
-const loginValidator = [
-  check('email', 'Please include a valid email').isEmail(),
-  check('password', 'Password is required').exists(),
-];
+export const loginValidator = [
+  check('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Invalid email format')
+    .normalizeEmail(),
 
-export { registerValidator, loginValidator }; 
+  check('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required')
+]; 

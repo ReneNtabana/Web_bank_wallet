@@ -1,63 +1,41 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Transaction = sequelize.define('Transaction', {
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
-  },
-  accountId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Accounts',
-      key: 'id'
-    }
-  },
-  categoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Categories',
-      key: 'id'
-    }
-  },
+const transactionSchema = new mongoose.Schema({
   type: {
-    type: DataTypes.ENUM('income', 'expense', 'transfer'),
-    allowNull: false
+    type: String,
+    enum: ['income', 'expense', 'transfer'],
+    required: true
   },
   amount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+    type: Number,
+    required: true
   },
-  description: {
-    type: DataTypes.TEXT
+  description: String,
+  account: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: true
+  },
+  toAccount: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account'
+  },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
   },
   date: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
+    type: Date,
+    default: Date.now
   },
-  status: {
-    type: DataTypes.ENUM('completed', 'pending', 'cancelled'),
-    defaultValue: 'completed'
-  },
-  attachments: {
-    type: DataTypes.JSONB,
-    defaultValue: []
-  },
-  // location: {
-  //   type: DataTypes.GEOMETRY('POINT'),
-  //   allowNull: true
-  // }
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
 }, {
-  timestamps: true,
-  indexes: [
-    { fields: ['date'] }
-  ]
+  timestamps: true
 });
 
-export { Transaction }; 
+export const Transaction = mongoose.model('Transaction', transactionSchema); 
