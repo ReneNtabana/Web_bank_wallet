@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import transactionService from '../services/transaction.service';
-import accountService from '../services/account.service';
+import { transactionService } from '../services/transaction.service';
+import { accountService } from '../services/account.service';
 import { Transaction, Account } from '../types';
 import { formatCurrency } from '../utils/format';
 
@@ -14,8 +14,8 @@ const Transactions = () => {
     const fetchData = async () => {
       try {
         const [transactionsData, accountsData] = await Promise.all([
-          transactionService.getTransactions(),
-          accountService.getAccounts()
+          transactionService.getAll(),
+          accountService.getAll()
         ]);
         setTransactions(transactionsData);
         setAccounts(accountsData);
@@ -74,18 +74,18 @@ const Transactions = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {transactions.map((transaction) => (
               <motion.tr
-                key={transaction.id}
+                key={transaction._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(transaction.date).toLocaleDateString()}
+                  {transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {transaction.description}
+                  {transaction?.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.category.name}
+                  {transaction?.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatCurrency(transaction.amount)}
@@ -104,11 +104,11 @@ const Transactions = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.account.name}
+                  {transaction.account}
                 </td>
                 {transaction.type === 'transfer' && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.toAccount?.name}
+                    {transaction.toAccount}
                   </td>
                 )}
               </motion.tr>

@@ -6,7 +6,7 @@ import { formatCurrency } from '../../utils/format';
 interface EditBudgetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (id: number, data: Partial<Budget>) => Promise<void>;
+  onSubmit: (id: string, data: Partial<Budget>) => Promise<void>;
   budget: Budget | null;
   categories: Category[];
 }
@@ -47,7 +47,7 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
     
     setIsLoading(true);
     try {
-      await onSubmit(budget.id, formData);
+      await onSubmit(budget._id, formData);
       onClose();
     } catch (error) {
       console.error('Error updating budget:', error);
@@ -59,7 +59,7 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
   if (!budget) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Budget - ${budget.category.name}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Budget - ${budget.category}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="amount" className="block text-sm font-medium text-gray-700">

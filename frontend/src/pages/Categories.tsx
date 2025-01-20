@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Category } from '../types';
-import categoryService from '../services/category.service';
+import { Category, CreateCategoryDto, UpdateCategoryDto } from '../types';
+import { categoryService } from '../services/category.service';
 import AddCategoryModal from '../components/categories/AddCategoryModal';
 import EditCategoryModal from '../components/categories/EditCategoryModal';
-import { CreateCategoryData } from '../services/category.service';
 import Modal from '../components/common/Modal';
 
 const Categories = () => {
@@ -20,7 +19,7 @@ const Categories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await categoryService.getCategories();
+        const data = await categoryService.getAll();
         setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -32,20 +31,20 @@ const Categories = () => {
     fetchCategories();
   }, []);
 
-  const handleAddCategory = async (data: { name: string; type: 'income' | 'expense'; color: string }) => {
+  const handleAddCategory = async (data: CreateCategoryDto) => {
     try {
-      const newCategory = await categoryService.createCategory(data);
+      const newCategory = await categoryService.create(data);
       setCategories([...categories, newCategory]);
     } catch (error) {
       console.error('Error creating category:', error);
     }
   };
 
-  const handleEditCategory = async (id: number, data: Partial<CreateCategoryData>) => {
+  const handleEditCategory = async (id: string, data: Partial<UpdateCategoryDto>) => {
     try {
-      const updatedCategory = await categoryService.updateCategory(id, data);
+      const updatedCategory = await categoryService.update(id.toString(), data);
       setCategories(categories.map(cat => 
-        cat.id === id ? updatedCategory : cat
+        cat._id === updatedCategory._id ? updatedCategory : cat
       ));
     } catch (error) {
       console.error('Error updating category:', error);
@@ -57,10 +56,10 @@ const Categories = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteCategory = async (id: number) => {
+  const handleDeleteCategory = async (id: string) => {
     try {
-      await categoryService.deleteCategory(id);
-      setCategories(categories.filter(cat => cat.id !== id));
+      await categoryService.delete(id);
+      setCategories(categories.filter(cat => cat._id !== id));
       setIsDeleteModalOpen(false);
       setSelectedCategory(null);
     } catch (error) {
@@ -168,7 +167,7 @@ const Categories = () => {
             {filteredCategories
               .filter(category => category.type === 'expense')
               .map(category => (
-                <CategoryItem key={category.id} category={category} />
+                <CategoryItem key={category._id} category={category} />
               ))}
           </div>
         </motion.div>
@@ -185,7 +184,7 @@ const Categories = () => {
             {filteredCategories
               .filter(category => category.type === 'income')
               .map(category => (
-                <CategoryItem key={category.id} category={category} />
+                <CategoryItem key={category._id} category={category} />
               ))}
           </div>
         </motion.div>
@@ -231,7 +230,7 @@ const Categories = () => {
               Cancel
             </button>
             <button
-              onClick={() => selectedCategory && handleDeleteCategory(selectedCategory.id)}
+              onClick={() => selectedCategory && handleDeleteCategory(selectedCategory._id)}
               className="btn bg-red-600 hover:bg-red-700 text-white"
             >
               Delete

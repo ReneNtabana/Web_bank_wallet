@@ -1,8 +1,10 @@
 export interface User {
-  id: number;
+  _id: string;
   name: string;
   email: string;
   token?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthState {
@@ -17,7 +19,8 @@ export interface ApiError {
 }
 
 export interface Account {
-  id: number;
+  _id: string;
+  user: string;
   name: string;
   type: 'bank' | 'cash' | 'mobile_money' | 'other';
   balance: number;
@@ -28,40 +31,82 @@ export interface Account {
   updatedAt: string;
 }
 
+export interface CreateAccountDto {
+  name: string;
+  type: 'bank' | 'cash' | 'mobile_money' | 'other';
+  balance: number;
+  currency?: string;
+  description?: string;
+}
+
+export interface UpdateAccountDto {
+  name?: string;
+  type?: 'bank' | 'cash' | 'mobile_money' | 'other';
+  balance?: number;
+  currency?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 export interface Transaction {
-  id: number;
+  _id: string;
   type: 'income' | 'expense' | 'transfer';
   amount: number;
-  description: string;
-  date: Date;
-  category: Category;
-  account: Account;
-  toAccount?: Account;
-  status: 'completed' | 'pending' | 'cancelled';
-  accountId: number;
-  categoryId: number;
-  createdAt: string;
-  updatedAt: string;
+  description?: string;
+  account: string;
+  toAccount?: string;
+  category: string;
+  date?: string;
   runningBalance?: number;
 }
 
+export interface CreateTransactionDto {
+  account: string;
+  toAccount?: string | undefined;
+  category?: string;
+  amount: number;
+  type: 'income' | 'expense' | 'transfer';
+  description?: string;
+  date: string | undefined;
+}
+
+export interface UpdateTransactionDto {
+  account: string;
+  toAccount?: string;
+  category?: string;
+  amount?: number;
+  type?: 'income' | 'expense' | 'transfer';
+  description?: string;
+  date?: string | undefined;
+}
+
 export interface Category {
-  id: number;
+  _id: string;
   name: string;
   type: 'income' | 'expense';
-  color: string;
+  color?: string;
   icon?: string;
-  parentId?: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+}
+
+export interface CreateCategoryDto {
+  name: string;
+  type: 'income' | 'expense';
+  color?: string;
+  icon?: string;
+}
+
+export interface UpdateCategoryDto {
+  name?: string;
+  type?: 'income' | 'expense';
+  color?: string;
+  icon?: string;
+  isActive?: boolean;
 }
 
 export interface Budget {
-  id: number;
-  categoryId: number;
+  _id: string;
+  category: string;
   amount: number;
-  currentSpending: number;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
   startDate: string;
   endDate: string;
@@ -69,14 +114,12 @@ export interface Budget {
     enabled: boolean;
     threshold?: number;
   };
+  currentSpending: number;
   isActive: boolean;
-  category: Category;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export interface CreateBudgetData {
-  categoryId: number;
+export interface CreateBudgetDto {
+  category: string;
   amount: number;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
   startDate: string;
@@ -85,4 +128,4 @@ export interface CreateBudgetData {
     enabled: boolean;
     threshold?: number;
   };
-} 
+}

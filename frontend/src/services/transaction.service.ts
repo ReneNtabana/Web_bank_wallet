@@ -1,62 +1,49 @@
 import api from './api';
-import { Transaction } from '../types';
-import accountService from './account.service';
+import { Transaction, CreateTransactionDto, UpdateTransactionDto } from '../types';
+import { accountService } from './account.service';
 
-export interface CreateTransactionData {
-  type: 'income' | 'expense' | 'transfer';
-  amount: number;
-  accountId: number;
-  categoryId: number;
-  description?: string;
-  date?: Date;
-  toAccountId?: number;
-}
-
-const transactionService = {
-  getTransactions: async (params?: { 
-    limit?: number; 
-    offset?: number;
-    startDate?: Date;
-    endDate?: Date;
-    type?: 'income' | 'expense' | 'transfer';
-    accountId?: number;
-    categoryId?: number;
-  }) => {
-    const response = await api.get<Transaction[]>('/transactions', { params });
+export const transactionService = {
+  getAll: async (params?: { limit?: number }): Promise<Transaction[]> => {
+    const response = await api.get('/transactions', { params });
     return response.data;
   },
 
-  getTransaction: async (id: number) => {
-    const response = await api.get<Transaction>(`/transactions/${id}`);
+  getById: async (id: string): Promise<Transaction> => {
+    const response = await api.get(`/transactions/${id}`);
     return response.data;
   },
 
-  createTransaction: async (data: CreateTransactionData): Promise<Transaction> => {
+  create: async (data: CreateTransactionDto): Promise<Transaction> => {
     const response = await api.post('/transactions', data);
     
     // If it's a transfer, update both accounts
-    if (data.type === 'transfer' && data.toAccountId) {
+    if (data.type === 'transfer' && data.toAccount) {
       await Promise.all([
-        accountService.updateAccount(data.accountId, { balance: -data.amount }),
-        accountService.updateAccount(data.toAccountId, { balance: data.amount })
+        accountService.update(data.account, { balance: -data.amount }),
+        accountService.update(data.toAccount, { balance: data.amount })
       ]);
     } else {
       // For regular transactions, just update one account
       const amount = data.type === 'income' ? data.amount : -data.amount;
-      await accountService.updateAccount(data.accountId, { balance: amount });
+      await accountService.update(data.account, { balance: amount });
     }
     
     return response.data;
   },
 
-  updateTransaction: async (id: number, data: Partial<CreateTransactionData>) => {
-    const response = await api.put<Transaction>(`/transactions/${id}`, data);
+  update: async (id: string, data: UpdateTransactionDto): Promise<Transaction> => {
+    const response = await api.put(`/transactions/${id}`, data);
     return response.data;
   },
 
-  deleteTransaction: async (id: number) => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/transactions/${id}`);
   },
+
+  getByAccount: async (accountId: string): Promise<Transaction[]> => {
+    const response = await api.get(`/transactions/account/${accountId}`);
+    return response.data;
+  }
 };
 
 export default transactionService; 

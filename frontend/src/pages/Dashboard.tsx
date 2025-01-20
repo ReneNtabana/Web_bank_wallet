@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { RootState } from '../redux/store';
-import accountService from '../services/account.service';
+import { accountService } from '../services/account.service';
 import transactionService from '../services/transaction.service';
 import WelcomeSection from '../components/dashboard/WelcomeSection';
 import QuickStats from '../components/dashboard/QuickStats';
@@ -11,9 +11,8 @@ import AccountsList from '../components/dashboard/AccountsList';
 import TransactionsList from '../components/dashboard/TransactionsList';
 import AddAccountModal from '../components/dashboard/AddAccountModal';
 import AddTransactionModal from '../components/dashboard/AddTransactionModal';
-import { CreateTransactionData } from '../services/transaction.service';
-import { CreateAccountData } from '../services/account.service';
-import { Account, Transaction } from '../types';
+import { CreateTransactionDto } from '../types';
+import { Account, Transaction, CreateAccountDto } from '../types';
 import BudgetOverview from '../components/dashboard/BudgetOverview';
 
 
@@ -36,8 +35,8 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [accountsData, transactionsData] = await Promise.all([
-          accountService.getAccounts(),
-          transactionService.getTransactions({ limit: 5 })
+          accountService.getAll(),
+          transactionService.getAll({ limit: 5 })
         ]);
 
         setAccounts(accountsData);
@@ -52,23 +51,23 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const handleAddAccount = async (data: CreateAccountData) => {
+  const handleAddAccount = async (data: CreateAccountDto) => {
     try {
-      const newAccount = await accountService.createAccount(data);
+      const newAccount = await accountService.create(data);
       setAccounts([...accounts, newAccount]);
     } catch (error) {
       console.error('Error creating account:', error);
     }
   };
 
-  const handleAddTransaction = async (data: CreateTransactionData) => {
+  const handleAddTransaction = async (data: CreateTransactionDto) => {
     try {
-      const newTransaction = await transactionService.createTransaction(data);
+      const newTransaction = await transactionService.create(data);
       setRecentTransactions([newTransaction, ...recentTransactions.slice(0, 4)]);
       
       // Update account balance
       const updatedAccounts = accounts.map(account => {
-        if (account.id === data.accountId) {
+        if (account._id === data.account) {
           const balanceChange = data.type === 'income' ? data.amount : -data.amount;
           return { ...account, balance: account.balance + balanceChange };
         }

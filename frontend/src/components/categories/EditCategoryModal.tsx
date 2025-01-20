@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
-import { Category } from '../../types';
-import { CreateCategoryData } from '../../services/category.service';
+import { Category, CreateCategoryDto, UpdateCategoryDto } from '../../types';
+
 
 interface EditCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (id: number, data: Partial<CreateCategoryData>) => Promise<void>;
+  onSubmit: (id: string, data: Partial<UpdateCategoryDto>) => Promise<void>;
   category: Category | null;
 }
 
 const EditCategoryModal = ({ isOpen, onClose, onSubmit, category }: EditCategoryModalProps) => {
-  const [formData, setFormData] = useState<CreateCategoryData>({
+  const [formData, setFormData] = useState<CreateCategoryDto>({
     name: '',
     type: 'expense',
     color: '#000000'
@@ -23,9 +23,7 @@ const EditCategoryModal = ({ isOpen, onClose, onSubmit, category }: EditCategory
       setFormData({
         name: category.name,
         type: category.type,
-        color: category.color,
-        ...(category.icon && { icon: category.icon }),
-        ...(category.parentId && { parentId: category.parentId })
+        color: category.color || '#000000',
       });
     }
   }, [category]);
@@ -36,7 +34,7 @@ const EditCategoryModal = ({ isOpen, onClose, onSubmit, category }: EditCategory
     
     setIsLoading(true);
     try {
-      await onSubmit(category.id, formData);
+      await onSubmit(category._id, formData);
       onClose();
     } catch (error) {
       console.error('Error updating category:', error);

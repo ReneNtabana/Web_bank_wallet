@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Budget, Category, CreateBudgetData } from '../types';
-import budgetService from '../services/budget.service';
-import categoryService from '../services/category.service';
+import { Budget, Category, CreateBudgetDto } from '../types';
+import { budgetService } from '../services/budget.service';
+import { categoryService } from '../services/category.service';
 import AddBudgetModal from '../components/budgets/AddBudgetModal';
 import { formatCurrency } from "../utils/format";
 import EditBudgetModal from '../components/budgets/EditBudgetModal';
@@ -19,8 +19,8 @@ const Budgets = () => {
     const fetchData = async () => {
       try {
         const [budgetsData, categoriesData] = await Promise.all([
-          budgetService.getBudgets(),
-          categoryService.getCategories()
+          budgetService.getAll(),
+          categoryService.getAll()
         ]);
         setBudgets(budgetsData);
         setCategories(categoriesData);
@@ -34,20 +34,20 @@ const Budgets = () => {
     fetchData();
   }, []);
 
-  const handleAddBudget = async (data: CreateBudgetData) => {
+    const handleAddBudget = async (data: CreateBudgetDto) => {
     try {
-      const newBudget = await budgetService.createBudget(data);
+      const newBudget = await budgetService.create(data);
       setBudgets([...budgets, newBudget]);
     } catch (error) {
       console.error('Error creating budget:', error);
     }
   };
 
-  const handleEditBudget = async (id: number, data: Partial<Budget>) => {
+  const handleEditBudget = async (id: string, data: Partial<Budget>) => {
     try {
-      const updatedBudget = await budgetService.updateBudget(id, data);
+      const updatedBudget = await budgetService.update(id, data);
       setBudgets(budgets.map(budget => 
-        budget.id === id ? updatedBudget : budget
+        budget._id === updatedBudget._id ? updatedBudget : budget
       ));
     } catch (error) {
       console.error('Error updating budget:', error);
@@ -82,7 +82,7 @@ const Budgets = () => {
       <div className="grid gap-6">
         {budgets.map(budget => (
           <BudgetCard 
-            key={budget.id} 
+            key={budget._id} 
             budget={budget} 
             onEdit={handleEditClick}
           />
@@ -123,7 +123,7 @@ const BudgetCard = ({ budget, onEdit }: { budget: Budget; onEdit: (budget: Budge
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold">{budget.category.name}</h3>
+          <h3 className="text-lg font-semibold">{budget.category}</h3>
           <p className="text-sm text-gray-500">
             {budget.period.charAt(0).toUpperCase() + budget.period.slice(1)} Budget
           </p>

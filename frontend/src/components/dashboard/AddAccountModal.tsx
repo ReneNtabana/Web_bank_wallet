@@ -1,62 +1,57 @@
 import { useState } from 'react';
 import Modal from '../common/Modal';
-import { CreateAccountData } from '../../services/account.service';
+import { CreateAccountDto } from '../../types';
 
-interface AddAccountModalProps {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateAccountData) => Promise<void>;
+  onSubmit: (data: CreateAccountDto) => void;
 }
 
-const AddAccountModal = ({ isOpen, onClose, onSubmit }: AddAccountModalProps) => {
-  const [formData, setFormData] = useState<CreateAccountData>({
-    name: '',
-    type: 'bank',
-    currency: 'USD',
-    description: '',
-    balance: 0
-  });
-  const [isLoading, setIsLoading] = useState(false);
+const AddAccountModal = ({ isOpen, onClose, onSubmit }: Props) => {
+  const [name, setName] = useState('');
+  const [type, setType] = useState<'bank' | 'cash' | 'mobile_money' | 'other'>('bank');
+  const [balance, setBalance] = useState('');
+  const [currency, setCurrency] = useState('USD');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      await onSubmit(formData);
-      onClose();
-    } catch (error) {
-      console.error('Error adding account:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    onSubmit({
+      name,
+      type,
+      balance: parseFloat(balance),
+      currency
+    });
+    onClose();
+    // Reset form
+    setName('');
+    setType('bank');
+    setBalance('');
+    setCurrency('USD');
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Account">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Account Name
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Name</label>
           <input
+            title="Name"
             type="text"
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-            Account Type
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Type</label>
           <select
-            id="type"
-            value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value as CreateAccountData['type'] })}
-            className="input"
+            title="Type"
+            value={type}
+            onChange={(e) => setType(e.target.value as typeof type)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
           >
             <option value="bank">Bank</option>
             <option value="cash">Cash</option>
@@ -66,14 +61,26 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit }: AddAccountModalProps) =>
         </div>
 
         <div>
-          <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
-            Currency
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Initial Balance</label>
+          <input
+            title="Initial Balance"
+            type="number"
+            value={balance}
+            onChange={(e) => setBalance(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            required
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Currency</label>
           <select
-            id="currency"
-            value={formData.currency}
-            onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-            className="input"
+            title="Currency"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
           >
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
@@ -81,33 +88,19 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit }: AddAccountModalProps) =>
           </select>
         </div>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description (Optional)
-          </label>
-          <textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="input"
-            rows={3}
-          />
-        </div>
-
         <div className="flex justify-end space-x-3 mt-6">
           <button
             type="button"
             onClick={onClose}
-            className="btn btn-secondary"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isLoading}
-            className="btn btn-primary"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md"
           >
-            {isLoading ? 'Adding...' : 'Add Account'}
+            Create Account
           </button>
         </div>
       </form>

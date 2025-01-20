@@ -1,38 +1,30 @@
 import api from './api';
-import { Category } from '../types';
+import { Category, CreateCategoryDto, UpdateCategoryDto } from '../types';
 
-export interface CreateCategoryData {
-  name: string;
-  type: 'income' | 'expense';
-  color: string;
-  icon?: string;
-  parentId?: number;
-}
+export type CreateCategoryData = CreateCategoryDto;
 
-const categoryService = {
-  getCategories: async () => {
-    const response = await api.get<Category[]>('/categories');
+export const categoryService = {
+  getAll: async (): Promise<Category[]> => {
+    const response = await api.get('/categories');
     return response.data;
   },
 
-  getCategory: async (id: number) => {
-    const response = await api.get<Category>(`/categories/${id}`);
+  getById: async (id: string): Promise<Category> => {
+    const response = await api.get(`/categories/${id}`);
     return response.data;
   },
 
-  createCategory: async (data: CreateCategoryData) => {
-    const response = await api.post<Category>('/categories', data);
+  create: async (data: CreateCategoryDto): Promise<Category> => {
+    const response = await api.post('/categories', data);
     return response.data;
   },
 
-  updateCategory: async (id: number, data: Partial<CreateCategoryData>) => {
-    const response = await api.put<Category>(`/categories/${id}`, data);
+  update: async (id: string, data: UpdateCategoryDto): Promise<Category> => {
+    const response = await api.put(`/categories/${id}`, data);
     return response.data;
   },
 
-  deleteCategory: async (id: number) => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/categories/${id}`);
-  },
-};
-
-export default categoryService; 
+  }
+}; 

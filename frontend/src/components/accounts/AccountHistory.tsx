@@ -16,21 +16,9 @@ const AccountHistory = ({ account }: AccountHistoryProps) => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const data = await transactionService.getTransactions({ accountId: account.id });
+        setIsLoading(true);
+        const data = await transactionService.getByAccount(account._id);
         setTransactions(data);
-        
-        // Calculate running balance
-        let runningBalance = account.balance;
-        const updatedTransactions = data.map(transaction => {
-          if (transaction.type === 'expense') {
-            runningBalance += transaction.amount;
-          } else if (transaction.type === 'income') {
-            runningBalance -= transaction.amount;
-          }
-          return { ...transaction, runningBalance };
-        }).reverse();
-        
-        setTransactions(updatedTransactions);
       } catch (error) {
         console.error('Error fetching transactions:', error);
       } finally {
@@ -39,7 +27,12 @@ const AccountHistory = ({ account }: AccountHistoryProps) => {
     };
 
     fetchTransactions();
-  }, [account]);
+  }, [account._id]);
+
+  const calculateRunningBalance = (transaction: Transaction) => {
+    // Add your running balance calculation logic here
+    return 0; // Placeholder
+  };
 
   if (isLoading) {
     return (
@@ -82,21 +75,20 @@ const AccountHistory = ({ account }: AccountHistoryProps) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction, index) => (
+            {transactions.map((transaction) => (
               <motion.tr
-                key={transaction.id}
+                key={transaction._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(transaction.date).toLocaleDateString()}
+                  {transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {transaction.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.category.name}
+                  {transaction.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span

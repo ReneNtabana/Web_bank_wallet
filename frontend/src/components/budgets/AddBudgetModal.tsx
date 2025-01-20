@@ -1,24 +1,21 @@
 import { useState } from 'react';
 import Modal from '../common/Modal';
-import { Category, CreateBudgetData } from '../../types';
+import { Category, CreateBudgetDto } from '../../types';
 
 interface AddBudgetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateBudgetData) => Promise<void>;
+  onSubmit: (data: CreateBudgetDto) => Promise<void>;
   categories: Category[];
 }
 
 const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModalProps) => {
-  const today = new Date().toISOString().split('T')[0] as string;
-  const nextMonth = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0] as string;
-
-  const [formData, setFormData] = useState<CreateBudgetData>({
-    categoryId: categories[0]?.id || 0,
+  const [formData, setFormData] = useState<CreateBudgetDto>({
+    category: categories[0]?._id || 'default',
     amount: 0,
     period: 'monthly',
-    startDate: today,
-    endDate: nextMonth,
+    startDate: new Date().toISOString().split('T')[0] || '',
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0] || '',
     notifications: {
       enabled: true,
       threshold: 80
@@ -28,6 +25,7 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!categories.length) return;
     setIsLoading(true);
     try {
       await onSubmit(formData);
@@ -48,13 +46,13 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
           </label>
           <select
             id="category"
-            value={formData.categoryId}
-            onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="input"
             required
           >
             {categories.map(category => (
-              <option key={category.id} value={category.id}>
+              <option key={category._id} value={category._id}>
                 {category.name}
               </option>
             ))}
@@ -84,7 +82,7 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
           <select
             id="period"
             value={formData.period}
-            onChange={(e) => setFormData({ ...formData, period: e.target.value as CreateBudgetData['period'] })}
+            onChange={(e) => setFormData({ ...formData, period: e.target.value as CreateBudgetDto['period'] })}
             className="input"
           >
             <option value="daily">Daily</option>

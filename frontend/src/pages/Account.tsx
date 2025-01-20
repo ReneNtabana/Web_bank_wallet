@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import accountService from '../services/account.service';
+import {accountService} from '../services/account.service';
 import { Account } from '../types';
 import AccountHistory from '../components/accounts/AccountHistory';
 
@@ -12,7 +12,7 @@ const AccountPage = () => {
   useEffect(() => {
     const fetchAccount = async () => {
       try {
-        const data = await accountService.getAccount(parseInt(id!));
+        const data = await accountService.getById(id!);
         setAccount(data);
       } catch (error) {
         console.error('Error fetching account:', error);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import budgetService from '../../services/budget.service';
+import { budgetService } from '../../services/budget.service';
 import { formatCurrency } from '../../utils/format';
 
 interface BudgetStatus {
