@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import accountRoutes from './routes/account.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
+import sequelize from '../config/database.js';
 
 dotenv.config();
 
@@ -17,9 +18,14 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Health check with DB status
+app.get('/api/health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ status: 'ok', database: 'connected' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'disconnected' });
+  }
 });
 
 // Routes
