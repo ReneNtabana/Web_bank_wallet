@@ -43,7 +43,7 @@ A comprehensive wallet management system that helps users track their expenses, 
 - **Backend**
   - Node.js
   - Express.js
-  - Postgres for database
+  - MongoDB for database
   - JWT for authentication
 
 ## Prerequisites
