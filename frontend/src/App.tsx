@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AnimatePresence } from 'framer-motion';
 import { store } from './redux/store';
@@ -17,10 +17,12 @@ import Welcome from './pages/Welcome';
 // Separate the routes into a new component that can use hooks
 const AppRoutes = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const location = useLocation();
+  const isWelcomePage = location.pathname === '/';
 
   return (
     <div className="h-screen bg-gray-50">
-      <div className="mb-16"><Navbar /></div>
+      {!isWelcomePage && <div className="mb-16"><Navbar /></div>}
       <main>
         <Routes>
           <Route path="/" element={<Welcome />} />
