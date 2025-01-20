@@ -11,30 +11,31 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
       rejectUnauthorized: false
     }
   },
-  logging: false,
   pool: {
     max: 2,
     min: 0,
-    idle: 0,
     acquire: 3000,
-    evict: 30000
+    idle: 10000
   }
 });
 
-// Test and initialize connection
+// Initialize database connection
 const initDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connection successful');
-    await sequelize.sync();
-    console.log('Database synchronized');
+    console.log('Database connected successfully');
+    return true;
   } catch (error) {
-    console.error('Connection error details:', {
-      url: process.env.DATABASE_URL?.split('@')[1], // Log only host part for security
-      error: error.message
+    console.error('Database connection error:', {
+      error: error.message,
+      database_url_exists: !!process.env.DATABASE_URL,
+      env: process.env.NODE_ENV
     });
+    return false;
   }
 };
+
+// Initialize connection
 
 initDatabase();
 
