@@ -86,6 +86,7 @@ const Dashboard = () => {
           <AccountsList 
             accounts={accounts} 
             onAddAccount={() => setIsAddAccountModal(true)} 
+            transactions={transactions}
           />
           <TransactionsList 
             transactions={transactions} 
