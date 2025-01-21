@@ -81,7 +81,7 @@ const EditBudgetModal = ({ isOpen, onClose, onSubmit, budget, categories }: Edit
             className="input"
             required
           />
-          {budget.currentSpending > 0 && (
+          {budget.currentSpending && budget.currentSpending > 0 && (
             <p className="text-sm text-gray-600 mt-1">
               Current spending: {formatCurrency(budget.currentSpending)}
             </p>

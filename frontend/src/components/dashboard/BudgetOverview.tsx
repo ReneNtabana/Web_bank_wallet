@@ -19,24 +19,28 @@ interface BudgetStatus {
   threshold: number;
 }
 
-const BudgetOverview = () => {
+interface BudgetOverviewProps {
+  onRefresh?: number;
+}
+
+const BudgetOverview = ({ onRefresh }: BudgetOverviewProps) => {
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBudgetStatus = async () => {
-      try {
-        const data = await budgetService.getBudgetStatus();
-        setBudgetStatus(data);
-      } catch (error) {
-        console.error('Error fetching budget status:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchBudgetStatus = async () => {
+    try {
+      const data = await budgetService.getBudgetStatus();
+      setBudgetStatus(data);
+    } catch (error) {
+      console.error('Error fetching budget status:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchBudgetStatus();
-  }, []);
+  }, [onRefresh]);
 
   if (isLoading) {
     return (

@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [isAddAccountModal, setIsAddAccountModal] = useState(false);
   const [isAddTransactionModal, setIsAddTransactionModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchDashboardData = async () => {
     try {
@@ -65,6 +66,7 @@ const Dashboard = () => {
       setTransactions([...transactions, newTransaction]);
       setIsAddTransactionModal(false);
       await fetchDashboardData();
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error creating transaction:', error);
     }
@@ -78,6 +80,9 @@ const Dashboard = () => {
         <>
           <WelcomeSection userName={user?.name || ''} />
           <QuickStats transactions={transactions} />
+          <div className="mt-6">
+            <BudgetOverview onRefresh={refreshTrigger} />
+          </div>
           <AccountsList 
             accounts={accounts} 
             onAddAccount={() => setIsAddAccountModal(true)} 
