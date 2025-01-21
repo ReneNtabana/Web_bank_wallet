@@ -39,7 +39,6 @@ A comprehensive wallet management system that helps users track their expenses, 
   - React.js
   - Redux for state management
   - Material-UI for components
-  - Chart.js for visualizations
 
 - **Backend**
   - Node.js
