@@ -14,6 +14,7 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import Transactions from './pages/Transactions';
 import Welcome from './pages/Welcome';
 import { setFavicon } from './utils/favicon';
+import Account from './pages/Account';
 
 // Separate the routes into a new component that can use hooks
 const AppRoutes = () => {
@@ -50,6 +51,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoute>
                 <Budgets />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/accounts"
+            element={
+              <PrivateRoute>
+                <Account />
               </PrivateRoute>
             }
           />

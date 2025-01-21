@@ -117,14 +117,20 @@ const Navbar = () => {
                     className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                   >
                     <div className="py-1" role="menu">
-                    <span className="hidden md:block text-sm font-medium text-center">{user.name}</span>
-                      <Link
-                        to="/profile"
+                      <span className="hidden md:block text-sm font-medium text-center">{user.name}</span>
+                      <span
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         role="menuitem"
                       >
                         Your Profile
-                      </Link>
+                      </span>
+                      {/* <Link
+                        to="/accounts"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                      >
+                        Accounts
+                      </Link> */}
                       <button
                         type='button'
                         onClick={handleLogout}
