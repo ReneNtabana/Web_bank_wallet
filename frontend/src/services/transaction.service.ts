@@ -15,18 +15,25 @@ export const transactionService = {
   },
 
   create: async (data: CreateTransactionDto): Promise<Transaction> => {
-    const response = await api.post('/transactions', data);
+    const formattedData = {
+      accountId: data.account._id,    
+      categoryId: data.category,      
+      amount: data.amount,            
+      type: data.type,               
+      description: data.description,  
+      date: data.date               
+    };
+
+    const response = await api.post('/transactions', formattedData);
     
-    // If it's a transfer, update both accounts
-    if (data.type === 'transfer' && data.accountId) {
+    if (data.type === 'transfer' && data.account._id) {
       await Promise.all([
-        accountService.update(data.accountId, { balance: -data.amount }),
-        accountService.update(data.accountId, { balance: data.amount })
+        accountService.update(data.account._id, { balance: -data.amount, name: data.account.name }),
+        accountService.update(data.account._id, { balance: data.amount, name: data.account.name })
       ]);
     } else {
-      // For regular transactions, just update one account
       const amount = data.type === 'income' ? data.amount : -data.amount;
-      await accountService.update(data.accountId, { balance: amount });
+      await accountService.update(data.account._id, { balance: amount, name: data.account.name });
     }
     
     return response.data;

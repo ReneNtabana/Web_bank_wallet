@@ -172,7 +172,6 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
               <input
                 type="number"
                 id="threshold"
-                min="1"
                 max="100"
                 value={formData.notifications.threshold}
                 onChange={handleThresholdChange}

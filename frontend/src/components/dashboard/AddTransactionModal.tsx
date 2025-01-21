@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Modal from '../common/Modal';
 import { Account, Category, CreateTransactionDto } from '../../types';
-import { categoryService } from '../../services/category.service';
 
 interface Props {
   isOpen: boolean;
@@ -12,45 +12,41 @@ interface Props {
 }
 
 const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }: Props) => {
+  if (accounts.length === 0) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="No Accounts">
+        <div className="text-center py-6">
+          <p className="text-gray-600 mb-4">
+            You need to create an account before adding transactions.
+          </p>
+          <Link
+            to="/accounts"
+            className="inline-block px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+          >
+            Create Account
+          </Link>
+        </div>
+      </Modal>
+    );
+  }
+
   const [formData, setFormData] = useState<CreateTransactionDto>({
-    accountId: '',
-    categoryId: '',
+    account: accounts[0] || { _id: '', name: '', type: '' },
     amount: 0,
     type: 'expense',
+    category: '',
     description: '',
-    date: ''
+    date: new Date().toISOString().split('T')[0] || ''
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (isLoading) return;
+
     try {
-      let categoryId = formData.categoryId;
-      
-      // If using custom category, create it first
-      if (formData.customCategory) {
-        const newCategory = await categoryService.create({
-          name: formData.customCategory,
-          type: formData.type as 'income' | 'expense',
-          color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
-        });
-        categoryId = newCategory._id;
-      }
-
-      await onSubmit({
-        ...formData,
-        categoryId,
-      });
-
-      setFormData({
-        accountId: '',
-        categoryId: '',
-        amount: 0,
-        type: 'expense',
-        description: '',
-        date: ''
-      });
+      setIsLoading(true);
+      await onSubmit(formData);
       onClose();
     } catch (error) {
       console.error('Error adding transaction:', error);
@@ -58,7 +54,6 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }
       setIsLoading(false);
     }
   };
-  console.log(formData, "------")
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Transaction">
@@ -81,15 +76,22 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }
           <label className="block text-sm font-medium text-gray-700">Account</label>
           <select
             title="Account"
-            value={formData.accountId}
-            onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+            value={formData.account._id}
+            onChange={(e) => {
+              const selectedAccount = accounts.find(acc => acc._id === e.target.value);
+              if (!selectedAccount) return;
+              setFormData({
+                ...formData,
+                account: selectedAccount
+              });
+            }}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             required
           >
             <option value="">Select Account</option>
-            {accounts.map((acc) => (
-              <option key={acc._id} value={acc._id}>
-                {acc.name}
+            {accounts.map((account) => (
+              <option key={account._id} value={account._id}>
+                {account.name}
               </option>
             ))}
           </select>
@@ -100,14 +102,21 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }
             <label className="block text-sm font-medium text-gray-700">To Account</label>
             <select
               title="To Account"
-              value={formData.accountId}
-              onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+              value={formData.account._id}
+              onChange={(e) => {
+                const selectedAccount = accounts.find(acc => acc._id === e.target.value);
+                if (!selectedAccount) return;
+                setFormData({
+                  ...formData,
+                  account: selectedAccount
+                });
+              }}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               required
             >
               <option value="">Select Account</option>
               {accounts
-                .filter((acc) => acc._id !== formData.accountId)
+                .filter((acc) => acc._id !== formData.account._id)
                 .map((acc) => (
                   <option key={acc._id} value={acc._id}>
                     {acc.name}
@@ -159,8 +168,8 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }
           {categories.filter(cat => cat.type === formData.type).length > 0 ? (
             <select
               title="Category"
-              value={formData.categoryId}
-              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               required
             >
@@ -177,8 +186,8 @@ const AddTransactionModal = ({ isOpen, onClose, onSubmit, accounts, categories }
             <input
               title="Custom Category"
               type="text"
-              value={formData.customCategory || ''}
-              onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+              value={formData.category || ''}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               placeholder="Enter custom category"
               required

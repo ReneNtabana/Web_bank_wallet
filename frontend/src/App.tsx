@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AnimatePresence } from 'framer-motion';
 import { store } from './redux/store';
@@ -13,15 +13,18 @@ import Navbar from './components/layout/Navbar';
 import PrivateRoute from "./components/auth/PrivateRoute";
 import Transactions from './pages/Transactions';
 import Welcome from './pages/Welcome';
+import { setFavicon } from './utils/favicon';
 
 // Separate the routes into a new component that can use hooks
 const AppRoutes = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const location = useLocation();
+  const isWelcomePage = location.pathname === '/';
 
   return (
     <div className="h-screen bg-gray-50">
-      <Navbar />
-      <main className="">
+      {!isWelcomePage && <div className="mb-16"><Navbar /></div>}
+      <main>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
@@ -59,6 +62,10 @@ const AppRoutes = () => {
 
 // Main App component wraps everything with providers
 const App = () => {
+  useEffect(() => {
+    setFavicon();
+  }, []);
+
   return (
     <Provider store={store}>
       <Router>
