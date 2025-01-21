@@ -105,7 +105,7 @@ const AccountHistory = ({ account }: AccountHistoryProps) => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  {transaction.runningBalance !== undefined ? formatCurrency(transaction.runningBalance) : 'N/A'}
+                  {/* {transaction. !== undefined ? formatCurrency(transaction.runningBalance) : 'N/A'} */}
                 </td>
               </motion.tr>
             ))}

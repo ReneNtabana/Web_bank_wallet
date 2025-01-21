@@ -11,7 +11,7 @@ interface AddBudgetModalProps {
 
 const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModalProps) => {
   const [formData, setFormData] = useState<CreateBudgetDto>({
-    category: categories[0]?._id || 'default',
+    category: '',
     amount: 0,
     period: 'monthly',
     startDate: new Date().toISOString().split('T')[0] || '',
@@ -77,14 +77,22 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
             id="category"
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="input"
+            className="input pl-8"
             required
           >
-            {categories.map(category => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
+            <option value="">Select Category</option>
+            {categories
+              .filter(cat => cat.type === 'expense')
+              .map((category) => (
+                <option 
+                  key={category._id} 
+                  value={category._id}
+                  style={{ backgroundColor: category.color + '10' }}
+                >
+                  {category.icon} {category.name}
+                </option>
+              ))
+            }
           </select>
         </div>
 

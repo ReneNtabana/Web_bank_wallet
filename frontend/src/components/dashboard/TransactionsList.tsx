@@ -4,10 +4,10 @@ import { formatDate } from '../../utils/formatters';
 interface TransactionsListProps {
   transactions: Transaction[];
   accounts: Account[];
-  onNewTransaction: () => void;
+  onAddTransaction: () => void;
 }
 
-const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListProps) => {
+const TransactionsList = ({ transactions, onAddTransaction }: TransactionsListProps) => {
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
       case 'income':
@@ -24,9 +24,10 @@ const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListPr
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Recent Transactions</h2>
         <button
-          onClick={onNewTransaction}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+          onClick={onAddTransaction}
+          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center gap-2"
         >
+          <span>➕</span>
           Add Transaction
         </button>
       </div>

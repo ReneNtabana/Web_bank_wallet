@@ -18,35 +18,34 @@ import BudgetOverview from '../components/dashboard/BudgetOverview';
 
 
 const Dashboard = () => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { user } = useSelector((state: RootState) => state.auth);
-  const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
-  const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddAccountModal, setIsAddAccountModal] = useState(false);
+  const [isAddTransactionModal, setIsAddTransactionModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [accountsData, transactionsData, categoriesData] = await Promise.all([
+        accountService.getAll(),
+        transactionService.getAll(),
+        categoryService.getAll()
+      ]);
+      setAccounts(accountsData);
+      setTransactions(transactionsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setError('Failed to load dashboard data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(false);
-        const [accountsData, transactionsData, categoriesData] = await Promise.all([
-          accountService.getAll(),
-          transactionService.getAll({ limit: 5 }),
-          categoryService.getAll()
-        ]);
-        console.log('Dashboard data:', { accountsData, transactionsData, categoriesData });
-
-        setAccounts(accountsData);
-        setRecentTransactions(transactionsData);
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
 
@@ -54,6 +53,7 @@ const Dashboard = () => {
     try {
       const newAccount = await accountService.create(data);
       setAccounts([...accounts, newAccount]);
+      await fetchDashboardData();
     } catch (error) {
       console.error('Error creating account:', error);
     }
@@ -62,67 +62,50 @@ const Dashboard = () => {
   const handleAddTransaction = async (data: CreateTransactionDto) => {
     try {
       const newTransaction = await transactionService.create(data);
-      setRecentTransactions([newTransaction, ...recentTransactions.slice(0, 4)]);
-      
-      // Update account balance
-      const updatedAccounts = accounts.map(account => {
-        if (account._id === data.account._id) {
-          const balanceChange = data.type === 'expense' ? -data.amount : data.amount;
-          return { ...account, balance: account.balance + balanceChange };
-        }
-        return account;
-      });
-      setAccounts(updatedAccounts);
-      
-      setIsAddTransactionModalOpen(false);
+      setTransactions([...transactions, newTransaction]);
+      setIsAddTransactionModal(false);
+      await fetchDashboardData();
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error('Error creating transaction:', error);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <WelcomeSection userName={user?.name || ''} />
-      <QuickStats accounts={accounts} recentTransactions={recentTransactions} />
-      
-      <div className="mt-6">
-        <BudgetOverview />
-      </div>
+      {error ? (
+        <div className="text-red-600">{error}</div>
+      ) : (
+        <>
+          <WelcomeSection userName={user?.name || ''} />
+          <QuickStats transactions={transactions} />
+          <AccountsList 
+            accounts={accounts} 
+            onAddAccount={() => setIsAddAccountModal(true)} 
+          />
+          <TransactionsList 
+            transactions={transactions} 
+            accounts={accounts}
+            onAddTransaction={() => setIsAddTransactionModal(true)}
+          />
 
-      <AccountsList 
-        accounts={accounts} 
-        onAddAccount={() => setIsAddAccountModalOpen(true)} 
-      />
-      <TransactionsList 
-        transactions={recentTransactions} 
-        accounts={accounts}
-        onNewTransaction={() => setIsAddTransactionModalOpen(true)} 
-      />
+          <AddAccountModal
+            isOpen={isAddAccountModal}
+            onClose={() => setIsAddAccountModal(false)}
+            onSubmit={handleAddAccount}
+            isLoading={isLoading}
+          />
 
-      <AddAccountModal
-        isOpen={isAddAccountModalOpen}
-        onClose={() => setIsAddAccountModalOpen(false)}
-        onSubmit={handleAddAccount}
-        isLoading={isLoading}
-      />
-
-      <AddTransactionModal
-        isOpen={isAddTransactionModalOpen}
-        onClose={() => setIsAddTransactionModalOpen(false)}
-        onSubmit={handleAddTransaction}
-        accounts={accounts}
-        categories={categories}
-      />
+          <AddTransactionModal
+            isOpen={isAddTransactionModal}
+            onClose={() => setIsAddTransactionModal(false)}
+            onSubmit={handleAddTransaction}
+            accounts={accounts}
+            categories={categories}
+          />
+        </>
+      )}
     </div>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
