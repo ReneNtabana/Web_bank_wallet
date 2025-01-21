@@ -28,6 +28,7 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
     setType('bank');
     setBalance('');
     setCurrency('USD');
+    onClose();
   };
 
   return (
