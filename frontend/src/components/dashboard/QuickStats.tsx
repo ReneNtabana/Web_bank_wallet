@@ -7,10 +7,11 @@ interface QuickStatsProps {
 
 const QuickStats = ({ transactions }: QuickStatsProps) => {
   const getTotalBalance = () => {
-    return transactions.reduce((sum, t) => {
+    const total = transactions.reduce((sum, t) => {
       const amount = t.type === 'expense' ? -t.amount : t.amount;
       return sum + amount;
     }, 0);
+    return Math.max(0, total);
   };
 
   const getMonthlyIncome = () => {

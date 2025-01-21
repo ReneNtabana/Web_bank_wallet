@@ -1,13 +1,23 @@
-import { Account } from '../../types';
+import { Account, Transaction } from '../../types';
 
 interface AccountsListProps {
   accounts: Account[];
   onAddAccount: () => void;
+  transactions: Transaction[];
 }
 
-const AccountsList = ({ accounts, onAddAccount }: AccountsListProps) => {
+const AccountsList = ({ accounts, onAddAccount, transactions }: AccountsListProps) => {
+  const calculateAccountBalance = (accountId: string) => {
+    return transactions.reduce((balance, t) => {
+      if (t.account._id === accountId) {
+        return balance + (t.type === 'expense' ? -t.amount : t.amount);
+      }
+      return balance;
+    }, 0);
+  };
+
   const getTotalBalance = () => {
-    return accounts.reduce((sum, account) => sum + account.balance, 0);
+    return accounts.reduce((sum, account) => sum + calculateAccountBalance(account._id), 0);
   };
 
   return (
@@ -41,7 +51,7 @@ const AccountsList = ({ accounts, onAddAccount }: AccountsListProps) => {
               </div>
               <div className="text-right">
                 <p className="text-lg font-semibold">
-                  {account.currency} {account.balance.toFixed(2)}
+                  {account.currency} {calculateAccountBalance(account._id).toFixed(2)}
                 </p>
               </div>
             </div>
