@@ -23,8 +23,14 @@ export const accountService = {
   },
 
   create: async (data: CreateAccountDto): Promise<Account> => {
-    const response = await api.post('/accounts', data);
-    console.log('Accounts creation:', response.data);
+    const formattedData = {
+      name: data.name,
+      type: data.type,
+      balance: Number(data.balance),
+      currency: data.currency
+    };
+    const response = await api.post('/accounts', formattedData);
+    console.log('Account creation:', response.data);
     return response.data;
   },
 

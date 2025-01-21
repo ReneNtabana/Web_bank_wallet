@@ -79,7 +79,7 @@ const Dashboard = () => {
       ) : (
         <>
           <WelcomeSection userName={user?.name || ''} />
-          <QuickStats transactions={transactions} />
+          <QuickStats transactions={transactions} accounts={accounts} />
           <div className="mt-6">
             <BudgetOverview onRefresh={refreshTrigger} />
           </div>

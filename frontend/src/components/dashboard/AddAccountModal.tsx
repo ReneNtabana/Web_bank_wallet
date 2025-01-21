@@ -20,10 +20,9 @@ const AddAccountModal = ({ isOpen, onClose, onSubmit, isLoading }: Props) => {
     onSubmit({
       name,
       type,
-      balance: parseFloat(balance),
+      balance: parseFloat(balance) || 0,
       currency
     });
-    onClose();
     // Reset form
     setName('');
     setType('bank');
