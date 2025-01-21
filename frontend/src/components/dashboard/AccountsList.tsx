@@ -16,18 +16,27 @@ const AccountsList = ({ accounts, onAddAccount }: AccountsListProps) => {
         <h2 className="text-xl font-semibold">Your Accounts</h2>
         <button
           onClick={onAddAccount}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center gap-2"
         >
+          <span>➕</span>
           Add Account
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {accounts.map((account) => (
-          <div key={account._id} className="bg-white p-4 rounded-lg shadow">
+          <div 
+            key={account._id} 
+            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+          >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-medium">{account.name}</h3>
+                <h3 className="font-medium flex items-center gap-2">
+                  {account.type === 'bank' ? '🏦' : 
+                   account.type === 'cash' ? '💵' : 
+                   account.type === 'mobile_money' ? '📱' : '💳'}
+                  {account.name}
+                </h3>
                 <p className="text-sm text-gray-500 capitalize">{account.type}</p>
               </div>
               <div className="text-right">

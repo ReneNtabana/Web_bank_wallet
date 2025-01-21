@@ -8,6 +8,13 @@ export interface Notification {
   read: boolean;
   createdAt: string;
   updatedAt: string;
+ budget?: {
+     id: string;
+     amount: number;
+    spent: number;
+    remaining: number;
+    period: string;
+  };
 }
 
 export const notificationService = {

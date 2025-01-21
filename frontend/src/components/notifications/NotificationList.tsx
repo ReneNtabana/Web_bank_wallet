@@ -16,7 +16,11 @@ const NotificationList = ({ onClose }: NotificationListProps) => {
   const fetchNotifications = async () => {
     try {
       const data = await notificationService.getAll();
-      setNotifications(data);
+      // Sort notifications by date, newest first
+      const sortedNotifications = data.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setNotifications(sortedNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -40,7 +44,10 @@ const NotificationList = ({ onClose }: NotificationListProps) => {
   }
 
   return (
-    <div className="max-h-[400px] overflow-y-auto">
+    <div className="w-full max-w-sm bg-white shadow-lg rounded-lg max-h-96 overflow-y-auto">
+      <div className="p-4 border-b">
+        <h3 className="text-lg font-medium">Notifications</h3>
+      </div>
       {notifications.length === 0 ? (
         <div className="p-4 text-center text-gray-500">
           No notifications at this time
@@ -54,9 +61,21 @@ const NotificationList = ({ onClose }: NotificationListProps) => {
                 notification.read ? 'bg-gray-50' : 'bg-white'
               }`}
             >
-              <div className="flex justify-between items-start">
+              <div className={`flex items-start ${
+                notification.type === 'budget' ? 'text-red-600' : ''
+              }`}>
+                {notification.type === 'budget' && (
+                  <span className="mr-2">⚠️</span>
+                )}
                 <div className="flex-1">
-                  <p className="text-sm text-gray-900">{notification.message}</p>
+                  <p className="text-sm">{notification.message}</p>
+                  {notification.type === 'budget' && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      <p>Budget: ${notification.budget?.amount}</p>
+                      <p>Spent: ${notification.budget?.spent}</p>
+                      <p>Remaining: ${notification.budget?.remaining}</p>
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(notification.createdAt).toLocaleDateString()}
                   </p>

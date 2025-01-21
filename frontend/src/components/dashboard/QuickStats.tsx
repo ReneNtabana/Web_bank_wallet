@@ -2,25 +2,27 @@ import { motion } from 'framer-motion';
 import { Account, Transaction } from '../../types';
 
 interface QuickStatsProps {
-  accounts: Account[];
-  recentTransactions: Transaction[];
+  transactions: Transaction[];
 }
 
-const QuickStats = ({ accounts, recentTransactions }: QuickStatsProps) => {
+const QuickStats = ({ transactions }: QuickStatsProps) => {
   const getTotalBalance = () => {
-    return accounts.reduce((sum, account) => sum + account.balance, 0);
+    return transactions.reduce((sum, t) => {
+      const amount = t.type === 'expense' ? -t.amount : t.amount;
+      return sum + amount;
+    }, 0);
   };
 
   const getMonthlyIncome = () => {
     const thisMonth = new Date().getMonth();
-    return recentTransactions
+    return transactions
       .filter(t => t.date && new Date(t.date).getMonth() === thisMonth && t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
   };
 
   const getMonthlyExpenses = () => {
     const thisMonth = new Date().getMonth();
-    return recentTransactions
+    return transactions
       .filter(t => t.date && new Date(t.date).getMonth() === thisMonth && t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
   };

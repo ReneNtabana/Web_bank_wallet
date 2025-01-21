@@ -23,10 +23,14 @@ const Budgets = () => {
           budgetService.getAll(),
           categoryService.getAll()
         ]);
-        console.log('Budgets:', budgetsData);
-        console.log('Categories:', categoriesData);
+        // Make sure categories have icon and color
+        const formattedCategories = categoriesData.map(cat => ({
+          ...cat,
+          icon: cat.icon || '📋',  // Default icon if none exists
+          color: cat.color || '#808080'  // Default color if none exists
+        }));
         setBudgets(budgetsData);
-        setCategories(categoriesData);
+        setCategories(formattedCategories);
       } catch (error) {
         console.error('Error fetching budgets:', error);
         setError('Failed to load budgets');

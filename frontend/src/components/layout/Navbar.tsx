@@ -118,12 +118,13 @@ const Navbar = () => {
                   >
                     <div className="py-1" role="menu">
                       <span className="hidden md:block text-sm font-medium text-center">{user.name}</span>
-                      <span
+                      <Link
+                        to="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         role="menuitem"
                       >
                         Your Profile
-                      </span>
+                      </Link>
                       {/* <Link
                         to="/accounts"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

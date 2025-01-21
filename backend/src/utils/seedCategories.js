@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import { Category } from '../models/Category.model.js';
 
 dotenv.config();
@@ -31,6 +32,24 @@ const defaultCategories = [
     type: 'expense',
     color: '#F44336',
     icon: '🏠'
+  },
+  {
+    name: 'Groceries',
+    type: 'expense',
+    color: '#4CAF50',
+    icon: '🛒'
+  },
+  {
+    name: 'Events',
+    type: 'expense',
+    color: '#9C27B0',
+    icon: '🎉'
+  },
+  {
+    name: 'Trips',
+    type: 'expense',
+    color: '#03A9F4',
+    icon: '✈️'
   },
   {
     name: 'Transportation',
@@ -73,6 +92,12 @@ const defaultCategories = [
     type: 'expense',
     color: '#3F51B5',
     icon: '📚'
+  },
+  {
+    name: 'Others',
+    type: 'expense',
+    color: '#9E9E9E',
+    icon: '📝'
   }
 ];
 

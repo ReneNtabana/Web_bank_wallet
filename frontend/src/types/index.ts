@@ -50,21 +50,25 @@ export interface UpdateAccountDto {
 
 export interface Transaction {
   _id: string;
-  amount: number;
   type: 'income' | 'expense' | 'transfer';
+  amount: number;
   description: string;
   date: string;
-  category: {
-    _id: string;
-    name: string;
-    type: string;
-  };
   account: {
     _id: string;
     name: string;
     type: string;
   };
-  runningBalance?: number;
+  category: {
+    _id: string;
+    name: string;
+    type?: string;
+    icon?: string;
+    color?: string;
+  };
+  user: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateTransactionDto {
@@ -94,8 +98,9 @@ export interface Category {
   _id: string;
   name: string;
   type: 'income' | 'expense';
-  color?: string;
+  user?: string;
   icon?: string;
+  color?: string;
 }
 
 export interface CreateCategoryDto {
@@ -142,5 +147,22 @@ export interface CreateBudgetDto {
   notifications?: {
     enabled: boolean;
     threshold: number;
+  };
+}
+
+export interface Notification {
+  _id: string;
+  user: string;
+  type: 'budget' | 'transaction';
+  message: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+  budget?: {
+    id: string;
+    amount: number;
+    spent: number;
+    remaining: number;
+    period: string;
   };
 }

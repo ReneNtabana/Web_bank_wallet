@@ -1,5 +1,6 @@
 import { Budget } from '../models/Budget.model.js';
 import { Transaction } from '../models/Transaction.model.js';
+import { Notification } from '../models/Notification.model.js';
 
 class NotificationService {
   static async checkBudgetThresholds(userId, transaction) {
@@ -16,50 +17,45 @@ class NotificationService {
       const notifications = [];
 
       for (const budget of budgets) {
-        // Calculate total spending for this budget period
-        const totalSpending = await Transaction.aggregate([
-          {
-            $match: {
-              user: userId,
-              category: budget.category,
-              type: 'expense',
-              date: {
-                $gte: budget.startDate,
-                $lte: budget.endDate
+        if (budget.notifications?.enabled) {
+          // Calculate current spending for this budget period
+          const currentSpending = await Transaction.aggregate([
+            {
+              $match: {
+                user: userId,
+                category: transaction.category,
+                type: 'expense',
+                date: {
+                  $gte: budget.startDate,
+                  $lte: budget.endDate
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$amount' }
               }
             }
-          },
-          {
-            $group: {
-              _id: null,
-              total: { $sum: '$amount' }
-            }
-          }
-        ]);
+          ]);
 
-        const currentSpending = totalSpending[0]?.total || 0;
+          const spendingAmount = currentSpending[0]?.total || 0;
+          const spendingPercentage = (spendingAmount / budget.amount) * 100;
 
-        // Update current spending in budget
-        budget.currentSpending = currentSpending;
-        await budget.save();
-
-        // Check if threshold is exceeded
-        if (budget.notifications?.enabled) {
-          const spendingPercentage = (currentSpending / budget.amount) * 100;
-          const threshold = budget.notifications.threshold || 80;
-
-          if (spendingPercentage >= threshold) {
-            notifications.push({
-              type: 'BUDGET_THRESHOLD_EXCEEDED',
-              message: `You've spent ${spendingPercentage.toFixed(1)}% of your ${budget.period} budget for ${transaction.category.name}`,
+          if (spendingPercentage >= budget.notifications.threshold) {
+            const notification = await Notification.create({
+              user: userId,
+              type: 'budget',
+              message: `Your ${budget.category.name} budget has exceeded ${budget.notifications.threshold}% of its limit`,
               budget: {
                 id: budget._id,
                 amount: budget.amount,
-                spent: currentSpending,
+                spent: spendingAmount,
                 remaining: budget.amount - currentSpending,
                 period: budget.period
               }
             });
+            notifications.push(notification);
           }
         }
       }
