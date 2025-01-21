@@ -7,7 +7,7 @@ interface TransactionsListProps {
   onNewTransaction: () => void;
 }
 
-const TransactionsList = ({ transactions, accounts, onNewTransaction }: TransactionsListProps) => {
+const TransactionsList = ({ transactions, onNewTransaction }: TransactionsListProps) => {
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
       case 'income':
@@ -17,11 +17,6 @@ const TransactionsList = ({ transactions, accounts, onNewTransaction }: Transact
       case 'transfer':
         return '↔';
     }
-  };
-
-  const getAccountName = (accountId: string) => {
-    const account = accounts.find(acc => acc._id === accountId);
-    return account?.name || 'Unknown Account';
   };
 
   return (
@@ -51,7 +46,7 @@ const TransactionsList = ({ transactions, accounts, onNewTransaction }: Transact
                       <p className="text-sm text-gray-500">
                         {transaction.date ? formatDate(new Date(transaction.date)) : 'No date'}
                       </p>
-                      <p className="text-sm text-gray-500">{getAccountName(transaction.account)}</p>
+                      <p className="text-sm text-gray-500">{transaction.account.name}</p>
                     </div>
                   </div>
                   <div className={`text-right ${

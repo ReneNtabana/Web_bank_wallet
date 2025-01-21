@@ -66,7 +66,7 @@ const Dashboard = () => {
       
       // Update account balance
       const updatedAccounts = accounts.map(account => {
-        if (account._id === data.accountId) {
+        if (account._id === data.account._id) {
           const balanceChange = data.type === 'expense' ? -data.amount : data.amount;
           return { ...account, balance: account.balance + balanceChange };
         }

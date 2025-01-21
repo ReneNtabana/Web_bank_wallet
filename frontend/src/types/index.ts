@@ -50,24 +50,34 @@ export interface UpdateAccountDto {
 
 export interface Transaction {
   _id: string;
-  type: 'income' | 'expense' | 'transfer';
   amount: number;
-  description?: string;
-  account: string;
-  toAccount?: string;
-  category: string;
-  date?: string;
+  type: 'income' | 'expense' | 'transfer';
+  description: string;
+  date: string;
+  category: {
+    _id: string;
+    name: string;
+    type: string;
+  };
+  account: {
+    _id: string;
+    name: string;
+    type: string;
+  };
   runningBalance?: number;
 }
 
 export interface CreateTransactionDto {
-  accountId: string;
-  categoryId: string;
+  account: {
+    _id: string;
+    name: string;
+    type: string;
+  };
   amount: number;
   type: 'income' | 'expense' | 'transfer';
-  description?: string;
-  date?: string;
-  customCategory?: string;
+  description: string;
+  category: string;
+  date: string;
 }
 
 export interface UpdateTransactionDto {

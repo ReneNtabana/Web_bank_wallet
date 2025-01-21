@@ -30,9 +30,11 @@ const AccountsList = ({ accounts, onAddAccount }: AccountsListProps) => {
                 <h3 className="font-medium">{account.name}</h3>
                 <p className="text-sm text-gray-500 capitalize">{account.type}</p>
               </div>
-              <p className="text-lg font-semibold">
-                {account.currency} {account.balance.toFixed(2)}
-              </p>
+              <div className="text-right">
+                <p className="text-lg font-semibold">
+                  {account.currency} {account.balance.toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
         ))}

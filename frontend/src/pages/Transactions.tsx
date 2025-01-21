@@ -7,9 +7,11 @@ import { formatCurrency } from '../utils/format';
 import AddTransactionModal from '../components/dashboard/AddTransactionModal';
 import { formatDate } from '../utils/formatters';
 import { get } from 'http';
+import { categoryService } from '../services/category.service';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  console.log(transactions, "transactions");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -28,12 +30,14 @@ const Transactions = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [transactionsData, accountsData] = await Promise.all([
+        const [transactionsData, accountsData, categoriesData] = await Promise.all([
           transactionService.getAll(),
-          accountService.getAll()
+          accountService.getAll(),
+          categoryService.getAll()
         ]);
         setTransactions(transactionsData);
         setAccounts(accountsData);
+        setCategories(categoriesData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -44,16 +48,6 @@ const Transactions = () => {
     fetchData();
   }, []);
 
-  const getAccountName = (accountId: string) => {
-    const account = accounts.find(acc => acc._id === accountId);
-    return account?.name || 'Unknown Account';
-  };
-
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(cat => cat._id === categoryId);
-    console.log(category, "category");
-    return category?.name || 'Unknown Category';
-  };
 
   if (isLoading) {
     return (
@@ -92,9 +86,6 @@ const Transactions = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Account
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                To Account
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -111,7 +102,7 @@ const Transactions = () => {
                   {transaction?.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getCategoryName(transaction.category)}
+                  {transaction.category?.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatCurrency(transaction.amount)}
@@ -130,10 +121,7 @@ const Transactions = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getAccountName(transaction.account)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.type === 'transfer' ? getAccountName(transaction.toAccount || '') : '-'}
+                  {transaction.account?.name}
                 </td>
               </motion.tr>
             ))}

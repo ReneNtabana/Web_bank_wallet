@@ -4,8 +4,17 @@ import { Account, CreateAccountDto, UpdateAccountDto } from '../types';
 export const accountService = {
   getAll: async (): Promise<Account[]> => {
     const response = await api.get('/accounts');
-    console.log('Accounts response:', response.data);
-    return response.data;
+    // Get latest balances for each account
+    const accountsWithBalances = await Promise.all(
+      response.data.map(async (account: Account) => {
+        const currentAccount = await accountService.getById(account._id);
+        return {
+          ...account,
+          balance: currentAccount.balance
+        };
+      })
+    );
+    return accountsWithBalances;
   },
 
   getById: async (id: string): Promise<Account> => {
@@ -15,11 +24,19 @@ export const accountService = {
 
   create: async (data: CreateAccountDto): Promise<Account> => {
     const response = await api.post('/accounts', data);
+    console.log('Accounts creation:', response.data);
     return response.data;
   },
 
   update: async (id: string, data: UpdateAccountDto): Promise<Account> => {
-    const response = await api.put(`/accounts/${id}`, data);
+    // Get current account data first
+    const currentAccount = await accountService.getById(id);
+    
+    const response = await api.put(`/accounts/${id}`, {
+      ...currentAccount,
+      ...data,
+      balance: currentAccount.balance + (data.balance || 0)
+    });
     return response.data;
   },
 

@@ -88,7 +88,7 @@ const AccountHistory = ({ account }: AccountHistoryProps) => {
                   {transaction.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.category}
+                  {transaction.category.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span
