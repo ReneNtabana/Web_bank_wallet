@@ -79,7 +79,7 @@ const Navbar = () => {
               <button
                 title="Notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-full hover:bg-gray-100 relative"
+                className="p-2 rounded-full hover:bg-gray-100 relative mr-4"
               >
                 <BellIcon className="h-6 w-6" />
               </button>

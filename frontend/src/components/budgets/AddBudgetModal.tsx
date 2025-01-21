@@ -103,7 +103,7 @@ const AddBudgetModal = ({ isOpen, onClose, onSubmit, categories }: AddBudgetModa
           <input
             type="number"
             id="amount"
-            min="0"
+            min="0.0"
             step="0.01"
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}

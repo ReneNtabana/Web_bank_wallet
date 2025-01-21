@@ -15,32 +15,33 @@ const Budgets = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const fetchBudgets = async () => {
+    try {
+      const [budgetsData, categoriesData] = await Promise.all([
+        budgetService.getAll(),
+        categoryService.getAll()
+      ]);
+      // Make sure categories have icon and color
+      const formattedCategories = categoriesData.map(cat => ({
+        ...cat,
+        icon: cat.icon || '📋',  // Default icon if none exists
+        color: cat.color || '#808080'  // Default color if none exists
+      }));
+      setBudgets(budgetsData);
+      setCategories(formattedCategories);
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+      setError('Failed to load budgets');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBudgets = async () => {
-      try {
-        const [budgetsData, categoriesData] = await Promise.all([
-          budgetService.getAll(),
-          categoryService.getAll()
-        ]);
-        // Make sure categories have icon and color
-        const formattedCategories = categoriesData.map(cat => ({
-          ...cat,
-          icon: cat.icon || '📋',  // Default icon if none exists
-          color: cat.color || '#808080'  // Default color if none exists
-        }));
-        setBudgets(budgetsData);
-        setCategories(formattedCategories);
-      } catch (error) {
-        console.error('Error fetching budgets:', error);
-        setError('Failed to load budgets');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchBudgets();
-  }, []);
+  }, [refreshTrigger]);
 
   const handleAddBudget = async (data: CreateBudgetDto) => {
     try {
@@ -48,6 +49,7 @@ const Budgets = () => {
       const newBudget = await budgetService.create(data);
       setBudgets([...budgets, newBudget]);
       setIsAddModalOpen(false);
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error creating budget:', error);
       setError('Failed to create budget');
@@ -62,6 +64,7 @@ const Budgets = () => {
       setBudgets(budgets.map(budget => 
         budget._id === updatedBudget._id ? updatedBudget : budget
       ));
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error updating budget:', error);
     }
@@ -136,7 +139,7 @@ const Budgets = () => {
 };
 
 const BudgetCard = ({ budget, onEdit }: { budget: Budget; onEdit: (budget: Budget) => void }) => {
-  const progress = (budget.currentSpending / budget.amount) * 100;
+  const progress = ((budget.currentSpending || 0) / budget.amount) * 100;
   const isOverBudget = progress > 100;
   const isNearThreshold = progress >= (budget.notifications?.threshold || 80);
 
@@ -160,7 +163,7 @@ const BudgetCard = ({ budget, onEdit }: { budget: Budget; onEdit: (budget: Budge
         </div>
         <div className="text-right">
           <p className="text-lg font-bold">
-            {formatCurrency(budget.currentSpending)} / {formatCurrency(budget.amount)}
+            {formatCurrency(budget.currentSpending || 0)} / {formatCurrency(budget.amount)}
           </p>
           <p className={`text-sm ${isOverBudget ? 'text-red-500' : isNearThreshold ? 'text-yellow-500' : 'text-gray-500'}`}>
             {isOverBudget 

@@ -4,8 +4,16 @@ import { Budget, CreateBudgetDto } from '../types';
 export const budgetService = {
   getAll: async (): Promise<Budget[]> => {
     const response = await api.get('/budgets');
-    console.log('Budgets response:', response.data);
-    return response.data;
+    const statusResponse = await api.get('/budgets/status');
+    const budgetStatus = statusResponse.data;
+    
+    return response.data.map((budget: Budget) => {
+      const status = budgetStatus.find((s: any) => s.id === budget._id);
+      return {
+        ...budget,
+        currentSpending: status?.spent || 0
+      };
+    });
   },
 
   getById: async (id: string): Promise<Budget> => {

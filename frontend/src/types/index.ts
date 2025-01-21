@@ -134,7 +134,7 @@ export interface Budget {
     enabled: boolean;
     threshold: number;
   };
-  currentSpending: number;
+  currentSpending?: number;
   isActive: boolean;
 }
 
