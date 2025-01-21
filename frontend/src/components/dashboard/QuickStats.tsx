@@ -1,17 +1,21 @@
 import { motion } from 'framer-motion';
 import { Account, Transaction } from '../../types';
+import { formatCurrency } from '../../utils/format';
 
 interface QuickStatsProps {
   transactions: Transaction[];
+  accounts: Account[];
 }
 
-const QuickStats = ({ transactions }: QuickStatsProps) => {
+const QuickStats = ({ transactions, accounts }: QuickStatsProps) => {
   const getTotalBalance = () => {
-    const total = transactions.reduce((sum, t) => {
-      const amount = t.type === 'expense' ? -t.amount : t.amount;
-      return sum + amount;
+    const accountsTotal = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
+    
+    const transactionsTotal = transactions.reduce((sum, t) => {
+      return sum + (t.type === 'expense' ? -t.amount : t.amount);
     }, 0);
-    return Math.max(0, total);
+
+    return accountsTotal + transactionsTotal;
   };
 
   const getMonthlyIncome = () => {
@@ -37,20 +41,20 @@ const QuickStats = ({ transactions }: QuickStatsProps) => {
     >
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-gray-500 text-sm">Total Balance</h3>
-        <p className="text-2xl font-bold">${getTotalBalance().toFixed(2)}</p>
+        <p className="text-2xl font-bold">{formatCurrency(getTotalBalance())}</p>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-gray-500 text-sm">Monthly Income</h3>
         <p className="text-2xl font-bold text-green-600">
-          ${getMonthlyIncome().toFixed(2)}
+          {formatCurrency(getMonthlyIncome())}
         </p>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-gray-500 text-sm">Monthly Expenses</h3>
         <p className="text-2xl font-bold text-red-600">
-          ${getMonthlyExpenses().toFixed(2)}
+          {formatCurrency(getMonthlyExpenses())}
         </p>
       </div>
     </motion.div>
